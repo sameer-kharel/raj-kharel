@@ -1,134 +1,178 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.6, -0.05, 0.01, 0.99] as const,
+      },
+    },
+  };
+
   return (
     <footer
       style={{
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 100%)',
-        borderTop: '1px solid rgba(59, 130, 246, 0.1)',
-        color: '#cbd5e1',
-        padding: '64px 32px 32px',
+        background: 'linear-gradient(135deg, #0a0f1e 0%, #1a2332 25%, #0f1729 50%, #1e2a3f 75%, #0a0f1e 100%)',
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <style>{`
-        @keyframes fadeInUp {
-          0% {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes shimmer {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+          50% { box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5); }
+        }
+
+        .footer-wrapper {
+          position: relative;
+          border-top: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        .footer-wrapper::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+          animation: shimmer 3s infinite;
         }
 
         .footer-container {
           max-width: 1400px;
           margin: 0 auto;
+          padding: 80px 48px 32px;
+          position: relative;
+          z-index: 10;
         }
 
-        .footer-content {
+        .footer-grid {
           display: grid;
           grid-template-columns: 2fr 1fr 1fr 1fr;
-          gap: 48px;
-          margin-bottom: 48px;
-        }
-
-        .footer-section {
-          animation: fadeInUp 0.8s ease-out;
-        }
-
-        .footer-section:nth-child(1) {
-          animation-delay: 0s;
-        }
-
-        .footer-section:nth-child(2) {
-          animation-delay: 0.1s;
-        }
-
-        .footer-section:nth-child(3) {
-          animation-delay: 0.2s;
-        }
-
-        .footer-section:nth-child(4) {
-          animation-delay: 0.3s;
-        }
-
-        .footer-title {
-          font-size: 14px;
-          font-weight: 700;
-          color: #e2e8f0;
-          margin-bottom: 20px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-
-        .footer-link {
-          display: block;
-          color: #94a3b8;
-          text-decoration: none;
-          margin-bottom: 12px;
-          font-size: 14px;
-          transition: all 0.3s ease;
-        }
-
-        .footer-link:hover {
-          color: #60a5fa;
-          transform: translateX(4px);
+          gap: 60px;
+          margin-bottom: 60px;
         }
 
         .footer-brand {
-          margin-bottom: 16px;
+          max-width: 380px;
         }
 
-        .footer-logo {
+        .footer-logo-section {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 20px;
+          gap: 16px;
+          margin-bottom: 24px;
         }
 
-        .logo-icon {
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
+        .footer-logo-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
           display: flex;
           align-items: center;
           justify-content: center;
           color: white;
-          font-weight: bold;
-          font-size: 20px;
-          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+          font-weight: 900;
+          font-size: 24px;
+          box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
         }
 
-        .logo-text-wrapper {
+        .footer-logo-icon::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #60a5fa, #3b82f6, #2563eb);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+          z-index: -1;
+          filter: blur(8px);
+        }
+
+        .footer-brand:hover .footer-logo-icon::before {
+          opacity: 0.6;
+          animation: glow 2s infinite;
+        }
+
+        .footer-brand:hover .footer-logo-icon {
+          transform: scale(1.1) rotate(5deg);
+          box-shadow: 0 12px 35px rgba(59, 130, 246, 0.6);
+        }
+
+        .footer-logo-text {
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 4px;
         }
 
-        .logo-name {
-          font-weight: 700;
-          font-size: 16px;
-          color: #e2e8f0;
+        .footer-logo {
+          font-size: 28px;
+          font-weight: 900;
+          background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          letter-spacing: -0.5px;
         }
 
-        .logo-title {
+        .footer-logo-subtitle {
           font-size: 11px;
-          color: #60a5fa;
-          font-weight: 600;
-          letter-spacing: 0.5px;
+          background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 700;
+          letter-spacing: 1.5px;
           text-transform: uppercase;
         }
 
         .footer-description {
-          font-size: 14px;
-          color: #94a3b8;
-          line-height: 1.6;
-          margin-bottom: 20px;
+          font-size: 15px;
+          line-height: 1.8;
+          color: rgba(203, 213, 225, 0.7);
+          margin-bottom: 28px;
         }
 
         .social-links {
@@ -136,32 +180,117 @@ const Footer = () => {
           gap: 12px;
         }
 
-        .social-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
+        .social-link {
+          width: 48px;
+          height: 48px;
           background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
-          border: 1px solid rgba(59, 130, 246, 0.2);
+          border: 2px solid rgba(59, 130, 246, 0.2);
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #60a5fa;
-          text-decoration: none;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          color: rgba(203, 213, 225, 0.8);
+          position: relative;
+          overflow: hidden;
         }
 
-        .social-icon:hover {
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
+        .social-link::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .social-link:hover::before {
+          opacity: 1;
+        }
+
+        .social-link svg {
+          position: relative;
+          z-index: 1;
+          transition: transform 0.3s ease;
+        }
+
+        .social-link:hover {
           border-color: #3b82f6;
           color: white;
-          transform: translateY(-4px);
-          box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+          transform: translateY(-6px);
+          box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .social-link:hover svg {
+          transform: scale(1.1);
+        }
+
+        .footer-column h4 {
+          font-size: 16px;
+          font-weight: 800;
+          margin-bottom: 24px;
+          background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          position: relative;
+          padding-bottom: 12px;
+        }
+
+        .footer-column h4::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 40px;
+          height: 3px;
+          background: linear-gradient(90deg, #3b82f6, #2563eb);
+          border-radius: 2px;
+        }
+
+        .footer-links {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .footer-link {
+          color: rgba(203, 213, 225, 0.7);
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          display: inline-block;
+          position: relative;
+          padding-left: 20px;
+        }
+
+        .footer-link::before {
+          content: '→';
+          position: absolute;
+          left: 0;
+          opacity: 0;
+          transform: translateX(-10px);
+          transition: all 0.3s ease;
+          color: #60a5fa;
+        }
+
+        .footer-link:hover::before {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .footer-link:hover {
+          color: #60a5fa;
+          transform: translateX(8px);
         }
 
         .footer-divider {
           height: 1px;
           background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
-          margin: 32px 0;
+          margin: 40px 0;
         }
 
         .footer-bottom {
@@ -169,157 +298,276 @@ const Footer = () => {
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
-          gap: 20px;
-          padding-top: 24px;
-          border-top: 1px solid rgba(59, 130, 246, 0.1);
-        }
-
-        .footer-copyright {
-          font-size: 14px;
-          color: #64748b;
-        }
-
-        .footer-legal {
-          display: flex;
           gap: 24px;
+          padding-top: 32px;
+          border-top: 2px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .copyright {
           font-size: 14px;
+          color: rgba(148, 163, 184, 0.7);
+          font-weight: 500;
         }
 
-        .footer-legal a {
-          color: #94a3b8;
+        .footer-bottom-links {
+          display: flex;
+          gap: 28px;
+          flex-wrap: wrap;
+        }
+
+        .footer-bottom-link {
+          font-size: 14px;
+          color: rgba(148, 163, 184, 0.7);
           text-decoration: none;
+          font-weight: 500;
           transition: all 0.3s ease;
+          position: relative;
         }
 
-        .footer-legal a:hover {
+        .footer-bottom-link::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #3b82f6, #2563eb);
+          transition: width 0.3s ease;
+        }
+
+        .footer-bottom-link:hover::after {
+          width: 100%;
+        }
+
+        .footer-bottom-link:hover {
           color: #60a5fa;
         }
 
         @media (max-width: 1024px) {
-          .footer-content {
-            grid-template-columns: repeat(2, 1fr);
+          .footer-container {
+            padding: 60px 32px 32px;
+          }
+
+          .footer-grid {
+            grid-template-columns: 1fr 1fr;
             gap: 40px;
           }
         }
 
         @media (max-width: 768px) {
-          .footer-content {
+          .footer-container {
+            padding: 60px 24px 32px;
+          }
+
+          .footer-grid {
             grid-template-columns: 1fr;
-            gap: 32px;
+            gap: 40px;
+          }
+
+          .footer-brand {
+            max-width: 100%;
           }
 
           .footer-bottom {
             flex-direction: column;
-            align-items: flex-start;
+            text-align: center;
+            gap: 20px;
           }
 
-          .footer-legal {
-            width: 100%;
-            flex-wrap: wrap;
+          .footer-bottom-links {
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .footer-link {
+            padding-left: 0;
+          }
+
+          .footer-link::before {
+            display: none;
+          }
+
+          .footer-link:hover {
+            transform: translateX(0);
           }
         }
       `}</style>
 
-      <div className="footer-container">
-        {/* Footer Content */}
-        <div className="footer-content">
-          {/* About Section */}
-          <div className="footer-section">
-            <div className="footer-logo">
-              <div className="logo-icon">RK</div>
-              <div className="logo-text-wrapper">
-                <div className="logo-name">Raj Kharel</div>
-                <div className="logo-title">IKON Realty</div>
+      {/* Animated Background Elements */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: '20%',
+            right: '-10%',
+            width: '40%',
+            height: '40%',
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(60px)',
+          }}
+          animate={{
+            opacity: [0.3, 0.6, 0.3],
+            scale: [1, 1.2, 1],
+            x: [0, 30, 0],
+            y: [0, -30, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          style={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '-10%',
+            width: '35%',
+            height: '35%',
+            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.06) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(50px)',
+          }}
+          animate={{
+            opacity: [0.2, 0.5, 0.2],
+            scale: [1, 1.15, 1],
+            x: [0, -30, 0],
+            y: [0, 30, 0],
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+
+      <div className="footer-wrapper">
+        <motion.div
+          className="footer-container"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          <div className="footer-grid">
+            {/* Brand Section */}
+            <motion.div className="footer-brand" variants={itemVariants}>
+              <div className="footer-logo-section">
+                <motion.div
+                  className="footer-logo-icon"
+                  whileHover={{ rotate: 5, scale: 1.1 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  RK
+                </motion.div>
+                <div className="footer-logo-text">
+                  <div className="footer-logo">Raj Kharel</div>
+                  <div className="footer-logo-subtitle">Real Estate Expert</div>
+                </div>
               </div>
+              <p className="footer-description">
+                Your trusted real estate professional in the DMV area. Specializing in condos, 
+                townhouses, and single-family homes with personalized service and local expertise.
+              </p>
+              <div className="social-links">
+                <motion.a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  whileHover={{ y: -6 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </motion.a>
+                <motion.a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  whileHover={{ y: -6 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                </motion.a>
+                <motion.a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  whileHover={{ y: -6 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+                  </svg>
+                </motion.a>
+                <motion.a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-link"
+                  whileHover={{ y: -6 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </motion.a>
+              </div>
+            </motion.div>
+
+            {/* Quick Links */}
+            <motion.div className="footer-column" variants={itemVariants}>
+              <h4>Quick Links</h4>
+              <div className="footer-links">
+                <Link href="/" className="footer-link">Home</Link>
+                <Link href="/#about" className="footer-link">About</Link>
+                <Link href="/#properties" className="footer-link">Properties</Link>
+                <Link href="/listings" className="footer-link">Listings</Link>
+                <Link href="/#contact" className="footer-link">Contact</Link>
+              </div>
+            </motion.div>
+
+            {/* Services */}
+            <motion.div className="footer-column" variants={itemVariants}>
+              <h4>Services</h4>
+              <div className="footer-links">
+                <Link href="/listings" className="footer-link">Buy a Home</Link>
+                <Link href="/#contact" className="footer-link">Sell a Home</Link>
+                <Link href="/#contact" className="footer-link">Market Analysis</Link>
+                <Link href="/#contact" className="footer-link">Consultation</Link>
+                <Link href="/#contact" className="footer-link">Property Valuation</Link>
+              </div>
+            </motion.div>
+
+            {/* Contact Info */}
+            <motion.div className="footer-column" variants={itemVariants}>
+              <h4>Contact</h4>
+              <div className="footer-links">
+                <a href="tel:+17031234567" className="footer-link">(703) 123-4567</a>
+                <a href="mailto:raj@dmvrealty.com" className="footer-link">raj@dmvrealty.com</a>
+                <span className="footer-link" style={{ cursor: 'default', paddingLeft: 0 }}>Fairfax, VA 22030</span>
+                <span className="footer-link" style={{ cursor: 'default', paddingLeft: 0 }}>DMV Realty, INC.</span>
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="footer-divider" />
+
+          {/* Bottom Bar */}
+          <motion.div
+            className="footer-bottom"
+            variants={itemVariants}
+          >
+            <p className="copyright">
+              © {currentYear} Raj Kharel. All rights reserved.
+            </p>
+            <div className="footer-bottom-links">
+              <Link href="/privacy" className="footer-bottom-link">Privacy Policy</Link>
+              <Link href="/terms" className="footer-bottom-link">Terms of Service</Link>
+              <Link href="/sitemap" className="footer-bottom-link">Sitemap</Link>
             </div>
-            <p className="footer-description">
-              Premier real estate agent dedicated to helping you find your dream home and make smart investments with professional expertise.
-            </p>
-            <div className="social-links">
-              <a href="https://www.linkedin.com/in/raj-kharel-3954471b4/" className="social-icon" aria-label="LinkedIn" title="LinkedIn">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.39v-1.2h-2.84v8.37h2.84v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.84M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
-                </svg>
-              </a>
-              <a href="#" className="social-icon" aria-label="Facebook" title="Facebook">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z" />
-                </svg>
-              </a>
-              <a href="#" className="social-icon" aria-label="Instagram" title="Instagram">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1 1 12.324 0 6.162 6.162 0 0 1-12.324 0zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm4.965-10.322a1.44 1.44 0 1 1 2.881.001 1.44 1.44 0 0 1-2.881-.001z" />
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          {/* Services Section */}
-          <div className="footer-section">
-            <div className="footer-title">Services</div>
-            <a href="#listings" className="footer-link">
-              Home Buying
-            </a>
-            <a href="#listings" className="footer-link">
-              Property Selling
-            </a>
-            <a href="#listings" className="footer-link">
-              Investment Advisory
-            </a>
-            <a href="#listings" className="footer-link">
-              Market Analysis
-            </a>
-          </div>
-
-          {/* Company Section */}
-          <div className="footer-section">
-            <div className="footer-title">Company</div>
-            <a href="#about" className="footer-link">
-              About Me
-            </a>
-            <a href="#listings" className="footer-link">
-              Featured Properties
-            </a>
-            <a href="#contact" className="footer-link">
-              Get in Touch
-            </a>
-            <a href="#" className="footer-link">
-              Privacy Policy
-            </a>
-          </div>
-
-          {/* Contact Section */}
-          <div className="footer-section">
-            <div className="footer-title">Contact</div>
-            <a href="mailto:raj@ikonrealty.com" className="footer-link">
-              raj@ikonrealty.com
-            </a>
-            <a href="tel:+15551234567" className="footer-link">
-              +1 (555) 123-4567
-            </a>
-            <p className="footer-link" style={{ margin: '12px 0' }}>
-              San Francisco, CA
-            </p>
-            <p className="footer-link" style={{ margin: '12px 0', fontSize: '12px' }}>
-              Mon - Fri: 9am - 6pm
-            </p>
-          </div>
-        </div>
-
-        {/* Footer Divider */}
-        <div className="footer-divider"></div>
-
-        {/* Footer Bottom */}
-        <div className="footer-bottom">
-          <p className="footer-copyright">
-            © 2024 Raj Kharel at IKON Realty. All rights reserved.
-          </p>
-          <div className="footer-legal">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Cookie Policy</a>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </footer>
   );
