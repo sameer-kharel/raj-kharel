@@ -253,7 +253,7 @@ const Header = () => {
 
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <a href="#contact" className="cta-button">
-            Get Started
+            Contact Me
           </a>
           <button
             className={`hamburger ${isMenuOpen ? 'active' : ''}`}
