@@ -619,7 +619,7 @@ const Hero = () => {
                   custom={index}
                   transition={{ delay: 0.5 + index * 0.02 }}
                 >
-                  {letter}
+                  {letter === " " ? "\u00A0" : letter}
                 </motion.span>
               ))}
             </motion.div>
