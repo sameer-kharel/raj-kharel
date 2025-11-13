@@ -63,6 +63,10 @@ const About = () => {
           50% { opacity: 1; }
         }
 
+        :root {
+          --rotation: 15deg;
+        }
+
         .about-container {
           max-width: 1400px;
           margin: 0 auto;
@@ -136,19 +140,101 @@ const About = () => {
           font-weight: 700;
         }
 
-        .image-wrapper {
+        /* Exact CSS from provided code with increased rotation */
+        .hover-img-container {
           position: relative;
-          border-radius: 24px;
-          overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+          width: 100%;
+          height: 700px;
+          perspective: 1000px;
+          transition: transform .2s;
+          margin-top: 5px;
+          filter: drop-shadow(0 20px 80px rgba(59, 130, 246, 0.4));
         }
 
-        .image-wrapper::before {
-          content: '';
+        .hover-img-container:hover {
+          transform: scale(1.02);
+        }
+
+        .hover-img-container img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          border-radius: 12px;
+          transition: transform .7s cubic-bezier(0,0,0,1);
+        }
+
+        .hover-img-container div {
           position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), transparent);
-          z-index: 1;
+          width: 50%;
+          height: 50%;
+          z-index: 2;
+          opacity: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          transition: opacity .4s;
+        }
+
+        .hover-img-container .top-left {
+          top: 0;
+          left: 0;
+        }
+
+        .hover-img-container .top-left:hover ~ img {
+          transform: rotate3d(-1, 1, 0, var(--rotation));
+        }
+
+        .hover-img-container .top-right {
+          top: 0;
+          right: 0;
+        }
+
+        .hover-img-container .top-right:hover ~ img {
+          transform: rotate3d(-1, -1, 0, var(--rotation));
+        }
+
+        .hover-img-container .bottom-left {
+          bottom: 0;
+          left: 0;
+        }
+
+        .hover-img-container .bottom-left:hover ~ img {
+          transform: rotate3d(1, 1, 0, var(--rotation));
+        }
+
+        .hover-img-container .bottom-right {
+          bottom: 0;
+          right: 0;
+        }
+
+        .hover-img-container .bottom-right:hover ~ img {
+          transform: rotate3d(1, -1, 0, var(--rotation));
+        }
+
+        .hover-img-container .top-middle {
+          top: 0;
+          bottom: 50%;
+          inset-inline: 35%;
+          width: unset;
+          height: unset;
+        }
+
+        .hover-img-container .top-middle:hover ~ img {
+          transform: rotate3d(-1, 0, 0, var(--rotation));
+        }
+
+        .hover-img-container .bottom-middle {
+          top: 50%;
+          bottom: 0;
+          inset-inline: 35%;
+          width: unset;
+          height: unset;
+        }
+
+        .hover-img-container .bottom-middle:hover ~ img {
+          transform: rotate3d(1, 0, 0, var(--rotation));
         }
 
         .stats-grid {
@@ -224,6 +310,10 @@ const About = () => {
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
           }
+
+          .hover-img-container {
+            height: 500px;
+          }
         }
 
         @media (max-width: 768px) {
@@ -233,6 +323,10 @@ const About = () => {
 
           .stats-grid {
             grid-template-columns: 1fr;
+          }
+
+          .hover-img-container {
+            height: 400px;
           }
         }
       `}</style>
@@ -345,19 +439,22 @@ const About = () => {
             </p>
           </motion.div>
 
-          <motion.div
-            className="image-wrapper"
-            variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Image
-              src="/image.png"
-              alt="Raj Kharel - Real Estate Agent"
-              width={600}
-              height={700}
-              style={{ width: '100%', height: 'auto', display: 'block' }}
-            />
+          <motion.div variants={itemVariants}>
+            <div className="hover-img-container">
+              <div className="top-left"></div>
+              <div className="top-right"></div>
+              <div className="bottom-left"></div>
+              <div className="bottom-right"></div>
+              <div className="top-middle"></div>
+              <div className="bottom-middle"></div>
+              <Image
+                src="/image.png"
+                alt="Raj Kharel - Real Estate Agent"
+                width={600}
+                height={700}
+                style={{ width: '100%', height: '100%', display: 'block' }}
+              />
+            </div>
           </motion.div>
         </div>
 
