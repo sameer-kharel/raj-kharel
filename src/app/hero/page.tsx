@@ -625,7 +625,7 @@ const Hero = () => {
             </motion.div>
 
             <motion.p className="hero-description" variants={itemVariants}>
-              With over 15 years of experience serving DC, Maryland, and Virginia, I specialize in 
+              With over 2 years of experience serving DC, Maryland, and Virginia, I specialize in 
               helping clients buy and sell condos, townhouses, and single-family homes. Let me turn 
               your real estate dreams into reality with personalized service and expert guidance.
             </motion.p>
@@ -648,9 +648,9 @@ const Hero = () => {
 
             <motion.div className="hero-stats" variants={containerVariants}>
               {[
-                { value: '500+', label: 'Properties Sold' },
+                { value: '50+', label: 'Properties Sold' },
                 { value: '4.9/5', label: 'Client Rating' },
-                { value: '15+', label: 'Years Experience' },
+                { value: '2+', label: 'Years Experience' },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
