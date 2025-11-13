@@ -465,7 +465,7 @@ const Footer = () => {
               </p>
               <div className="social-links">
                 <motion.a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/profile.php?id=61577176485106"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-link"
@@ -477,7 +477,7 @@ const Footer = () => {
                   </svg>
                 </motion.a>
                 <motion.a
-                  href="https://linkedin.com"
+                  href="https://www.linkedin.com/in/raj-kharel-3954471b4/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-link"
@@ -489,7 +489,7 @@ const Footer = () => {
                   </svg>
                 </motion.a>
                 <motion.a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/rajkharelrealty/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-link"
@@ -501,7 +501,7 @@ const Footer = () => {
                   </svg>
                 </motion.a>
                 <motion.a
-                  href="https://twitter.com"
+                  href="https://www.instagram.com/rajkharelrealty/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-link"
