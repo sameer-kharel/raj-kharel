@@ -22,10 +22,10 @@ const Header = () => {
 
   const navItems = [
     { name: 'Home', href: '/', id: 'home' },
-    { name: 'About', href: '/#about', id: 'about' },
-    { name: 'Properties', href: '/#properties', id: 'properties' },
+    { name: 'About', href: '/about', id: 'about' },
+    { name: 'Properties', href: '/properties', id: 'properties' },
     { name: 'Listings', href: '/listings', id: 'listings' },
-    { name: 'Contact', href: '/#contact', id: 'contact' },
+    { name: 'Contact', href: '/contact', id: 'contact' },
   ];
 
   return (
@@ -91,7 +91,7 @@ const Header = () => {
         }
 
         .header-container {
-          max-width: 1400px;
+          max-width: 1200px;
           margin: 0 auto;
           padding: 20px 48px;
           display: flex;

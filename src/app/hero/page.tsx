@@ -631,11 +631,8 @@ const Hero = () => {
             </motion.p>
 
             <motion.div className="hero-cta-group" variants={itemVariants}>
-              <Link href="/#contact" className="hero-cta-primary">
-                <span>Get Started</span>
-                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
+              <Link href="/contact" className="hero-cta-primary">
+                <span>Sheduled A Meet</span>
               </Link>
               <Link href="/listings" className="hero-cta-secondary">
                 <span>View Listings</span>

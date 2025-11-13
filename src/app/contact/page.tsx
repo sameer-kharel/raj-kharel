@@ -690,7 +690,7 @@ const Contact = () => {
                         id="name"
                         name="name"
                         className="form-input"
-                        placeholder="John Doe"
+                        placeholder="kharel realty"
                         value={formData.name}
                         onChange={handleChange}
                         required
@@ -704,7 +704,7 @@ const Contact = () => {
                         id="email"
                         name="email"
                         className="form-input"
-                        placeholder="john@example.com"
+                        placeholder="your@email.com"
                         value={formData.email}
                         onChange={handleChange}
                         required
@@ -718,7 +718,7 @@ const Contact = () => {
                         id="phone"
                         name="phone"
                         className="form-input"
-                        placeholder="(571) 123-4567"
+                        placeholder="(123) 123-4567"
                         value={formData.phone}
                         onChange={handleChange}
                       />
@@ -774,7 +774,7 @@ const Contact = () => {
                         id="name"
                         name="name"
                         className="form-input"
-                        placeholder="John Doe"
+                        placeholder="kharel realty"
                         value={formData.name}
                         onChange={handleChange}
                         required
@@ -788,7 +788,7 @@ const Contact = () => {
                         id="email"
                         name="email"
                         className="form-input"
-                        placeholder="john@example.com"
+                        placeholder="your@email.com"
                         value={formData.email}
                         onChange={handleChange}
                         required
@@ -802,7 +802,7 @@ const Contact = () => {
                         id="phone"
                         name="phone"
                         className="form-input"
-                        placeholder="(571) 123-4567"
+                        placeholder="(123) 123-4567"
                         value={formData.phone}
                         onChange={handleChange}
                       />
