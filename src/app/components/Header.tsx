@@ -26,6 +26,8 @@ const Header = () => {
     { name: 'Properties', href: '/properties', id: 'properties' },
     { name: 'Listings', href: '/listings', id: 'listings' },
     { name: 'Contact', href: '/contact', id: 'contact' },
+    { name: 'Tools', href: '/tools', id: 'tools' },
+    { name: 'Reviews', href: '/reviews', id: 'reviews' },
   ];
 
   return (

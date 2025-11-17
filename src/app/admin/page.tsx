@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, FormEvent, ChangeEvent, ReactNode } from 'react';
+import Image from 'next/image'; // Import the Next.js Image component
 
 // --- TYPE DEFINITIONS ---
 interface Listing {
@@ -11,6 +12,7 @@ interface Listing {
   bedrooms: number;
   bathrooms: number;
   sqft: number;
+  featuredImage: string; // Add featuredImage to the interface
   status: 'active' | 'pending' | 'sold';
   soldPrice?: number;
   soldDate?: string;
@@ -197,6 +199,7 @@ const ManageListingsTab = ({ listings, onRefresh }: { listings: Listing[], onRef
         <table className="min-w-full text-sm">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
+              <th className="text-left font-semibold p-4">Image</th>
               <th className="text-left font-semibold p-4">Property</th>
               <th className="text-left font-semibold p-4">Price</th>
               <th className="text-right font-semibold p-4">Actions</th>
@@ -205,9 +208,23 @@ const ManageListingsTab = ({ listings, onRefresh }: { listings: Listing[], onRef
           <tbody className="divide-y divide-slate-100">
             {listings.map((listing) => (
               <tr key={listing._id}>
-                <td className="p-4"><div className="font-medium text-slate-900">{listing.title}</div><div className="text-slate-500">{listing.address}</div></td>
-                <td className="p-4 text-slate-600">${listing.price.toLocaleString()}</td>
-                <td className="p-4 text-right space-x-4">
+                <td className="p-4">
+                  <div className="w-24 h-16 relative rounded-md overflow-hidden">
+                    <Image
+                      src={listing.featuredImage}
+                      alt={listing.title}
+                      layout="fill"
+                      objectFit="cover"
+                      className="bg-slate-100"
+                    />
+                  </div>
+                </td>
+                <td className="p-4 align-top">
+                  <div className="font-medium text-slate-900">{listing.title}</div>
+                  <div className="text-slate-500">{listing.address}</div>
+                </td>
+                <td className="p-4 align-top text-slate-600">${listing.price.toLocaleString()}</td>
+                <td className="p-4 align-top text-right space-x-4">
                   <button onClick={() => handleAction(listing._id, 'sell')} className="font-semibold text-green-600 hover:text-green-700">Mark Sold</button>
                   <button onClick={() => handleAction(listing._id, 'delete')} className="font-semibold text-red-600 hover:text-red-700">Delete</button>
                 </td>
@@ -227,6 +244,7 @@ const SoldPropertiesTab = ({ soldProperties }: { soldProperties: Listing[] }) =>
       <table className="min-w-full text-sm">
         <thead className="bg-slate-50 text-slate-600">
           <tr>
+            <th className="text-left font-semibold p-4">Image</th>
             <th className="text-left font-semibold p-4">Property</th>
             <th className="text-left font-semibold p-4">Sold Price</th>
             <th className="text-left font-semibold p-4">Sold Date</th>
@@ -235,9 +253,23 @@ const SoldPropertiesTab = ({ soldProperties }: { soldProperties: Listing[] }) =>
         <tbody className="divide-y divide-slate-100">
           {soldProperties.map((prop) => (
             <tr key={prop._id}>
-              <td className="p-4"><div className="font-medium text-slate-900">{prop.title}</div><div className="text-slate-500">{prop.address}</div></td>
-              <td className="p-4 text-slate-600">${(prop.soldPrice || prop.price).toLocaleString()}</td>
-              <td className="p-4 text-slate-600">{prop.soldDate ? new Date(prop.soldDate).toLocaleDateString() : 'N/A'}</td>
+              <td className="p-4">
+                <div className="w-24 h-16 relative rounded-md overflow-hidden">
+                  <Image
+                    src={prop.featuredImage}
+                    alt={prop.title}
+                    layout="fill"
+                    objectFit="cover"
+                    className="bg-slate-100"
+                  />
+                </div>
+              </td>
+              <td className="p-4 align-top">
+                <div className="font-medium text-slate-900">{prop.title}</div>
+                <div className="text-slate-500">{prop.address}</div>
+              </td>
+              <td className="p-4 align-top text-slate-600">${(prop.soldPrice || prop.price).toLocaleString()}</td>
+              <td className="p-4 align-top text-slate-600">{prop.soldDate ? new Date(prop.soldDate).toLocaleDateString() : 'N/A'}</td>
             </tr>
           ))}
         </tbody>
@@ -249,6 +281,7 @@ const SoldPropertiesTab = ({ soldProperties }: { soldProperties: Listing[] }) =>
 
 const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
   const [formData, setFormData] = useState(initialFormData);
+  const [imageFile, setImageFile] = useState<File | null>(null); // State for the image file
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -256,22 +289,55 @@ const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
     setFormData(prev => ({ ...prev, [name]: ['price', 'bedrooms', 'bathrooms', 'sqft'].includes(name) ? Number(value) : value }));
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!imageFile) {
+      alert('Please select a featured image to upload.');
+      return;
+    }
     setIsSubmitting(true);
+
     try {
-      const res = await fetch('/api/admin/listings', {
+      // 1. Upload the image first
+      const imageUploadFormData = new FormData();
+      imageUploadFormData.append('image', imageFile);
+
+      const imageRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: imageUploadFormData,
+      });
+
+      const imageUploadResult = await imageRes.json();
+      if (!imageRes.ok) {
+        throw new Error(imageUploadResult.error || 'Failed to upload image.');
+      }
+      const imageUrl = imageUploadResult.url;
+
+      // 2. Create the listing with the returned image URL
+      const finalListingData = { ...formData, featuredImage: imageUrl };
+
+      const listingRes = await fetch('/api/admin/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(finalListingData),
       });
-      if (!res.ok) {
-        const errorData = await res.json();
+
+      if (!listingRes.ok) {
+        const errorData = await listingRes.json();
         throw new Error(errorData.error || 'Failed to create listing');
       }
+
       alert('Listing created successfully!');
-      setFormData(initialFormData);
-      onListingAdded();
+      setFormData(initialFormData); // Reset form
+      setImageFile(null); // Reset file input
+      onListingAdded(); // Refresh data and switch tab
+
     } catch (error: any) {
       alert(`Error: ${error.message}`);
       console.error(error);
@@ -289,7 +355,14 @@ const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
           <input name="title" value={formData.title} onChange={handleChange} placeholder="Property Title" className={inputField} required />
           <input name="address" value={formData.address} onChange={handleChange} placeholder="Full Address" className={inputField} required />
         </div>
-        <input name="featuredImage" value={formData.featuredImage} onChange={handleChange} placeholder="Image URL" className={inputField} required />
+        
+        {/* Updated Image Input */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Featured Image</label>
+          <input type="file" onChange={handleFileChange} accept="image/jpeg, image/png, image/webp" className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
+          {imageFile && <p className="text-xs text-slate-500 mt-1">Selected: {imageFile.name}</p>}
+        </div>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           <input name="price" type="number" value={formData.price} onChange={handleChange} placeholder="Price ($)" className={inputField} required />
           <input name="bedrooms" type="number" value={formData.bedrooms} onChange={handleChange} placeholder="Beds" className={inputField} required />
@@ -298,7 +371,7 @@ const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
         </div>
         <div className="pt-2">
           <button type="submit" disabled={isSubmitting} className="inline-flex justify-center rounded-lg bg-blue-600 px-8 py-3 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-            {isSubmitting ? 'Saving...' : 'Save Listing'}
+            {isSubmitting ? 'Uploading & Saving...' : 'Save Listing'}
           </button>
         </div>
       </form>
