@@ -1,767 +1,464 @@
 'use client';
-
-import React, { useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import Link from 'next/link';
-import Image from 'next/image';
+import React, { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
 
 const Hero = () => {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const gooeyButtonRef = useRef<HTMLAnchorElement>(null);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const particlesRef = useRef<HTMLCanvasElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Gooey button effect
+  // Track mouse movement for 3D title effect
   useEffect(() => {
-    const button = gooeyButtonRef.current;
-    if (!button) return;
-
-    const moveBg = (e: PointerEvent) => {
-      const rect = button.getBoundingClientRect();
-      button.style.setProperty('--x', String((e.clientX - rect.x) / rect.width * 100));
-      button.style.setProperty('--y', String((e.clientY - rect.y) / rect.height * 100));
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!titleRef.current) return;
+      
+      const rect = titleRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      // Calculate mouse position relative to title center
+      const deltaX = (e.clientX - centerX) / window.innerWidth;
+      const deltaY = (e.clientY - centerY) / window.innerHeight;
+      
+      setMousePosition({ x: deltaX, y: deltaY });
     };
 
-    // Intro animation
-    let i = 4;
-    button.style.setProperty('--a', '100%');
-    const x = setInterval(() => {
-      button.style.setProperty('--x', String(((Math.cos(i) + 2) / 3.6) * 100));
-      button.style.setProperty('--y', String(((Math.sin(i) + 2) / 3.6) * 100));
-      i += 0.03;
-      if (i > 11.5) {
-        clearInterval(x);
-        button.style.setProperty('--a', '');
-      }
-    }, 16);
-
-    const handlePointerOver = () => {
-      clearInterval(x);
-      button.style.setProperty('--a', '');
-    };
-
-    button.addEventListener('pointermove', moveBg);
-    button.addEventListener('pointerover', handlePointerOver);
+    window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      clearInterval(x);
-      button.removeEventListener('pointermove', moveBg);
-      button.removeEventListener('pointerover', handlePointerOver);
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
+  // Animated background particles
+  useEffect(() => {
+    const canvas = particlesRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles: Array<{
+      x: number;
+      y: number;
+      size: number;
+      speedX: number;
+      speedY: number;
+      opacity: number;
+    }> = [];
+
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 3 + 1,
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        opacity: Math.random() * 0.5 + 0.2,
+      });
+    }
+
+    let mouseX = canvas.width / 2;
+    let mouseY = canvas.height / 2;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((particle, i) => {
+        particle.x += particle.speedX;
+        particle.y += particle.speedY;
+
+        const dx = mouseX - particle.x;
+        const dy = mouseY - particle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 150) {
+          const force = (150 - distance) / 150;
+          particle.x -= (dx / distance) * force * 2;
+          particle.y -= (dy / distance) * force * 2;
+        }
+
+        if (particle.x < 0) particle.x = canvas.width;
+        if (particle.x > canvas.width) particle.x = 0;
+        if (particle.y < 0) particle.y = canvas.height;
+        if (particle.y > canvas.height) particle.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(100, 100, 100, ${particle.opacity})`;
+        ctx.fill();
+
+        particles.forEach((otherParticle, j) => {
+          if (i !== j) {
+            const dx = particle.x - otherParticle.x;
+            const dy = particle.y - otherParticle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 120) {
+              ctx.beginPath();
+              ctx.moveTo(particle.x, particle.y);
+              ctx.lineTo(otherParticle.x, otherParticle.y);
+              ctx.strokeStyle = `rgba(120, 120, 120, ${0.15 * (1 - distance / 120)})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        });
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // 3D Portrait effect
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    const mount = mountRef.current;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, mount.clientWidth / mount.clientHeight, 0.1, 100);
+    camera.position.z = 2;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(mount.clientWidth, mount.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mount.appendChild(renderer.domElement);
+
+    const loader = new THREE.TextureLoader();
+    const image = loader.load('/res/hero-portrait.png');
+    const depth = loader.load('/res/heatmap.png');
+    depth.wrapS = depth.wrapT = THREE.ClampToEdgeWrapping;
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTexture: { value: image },
+        uDepth: { value: depth },
+        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
       },
-    },
-  };
+      transparent: true,
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uTexture;
+        uniform sampler2D uDepth;
+        uniform vec2 uMouse;
+        varying vec2 vUv;
+        void main() {
+          float depth = texture2D(uDepth, vUv).r;
+          float mx = (uMouse.x - 0.5) * 0.04;
+          float my = (uMouse.y - 0.5) * 0.02;
+          vec2 displacedUv = vUv + vec2(mx * depth, my * depth);
+          vec4 color = texture2D(uTexture, displacedUv);
+          float brightness = (color.r + color.g + color.b) / 3.0;
+          float alpha = 1.0 - smoothstep(0.75, 0.95, brightness);
+          gl_FragColor = vec4(color.rgb, color.a * alpha);
+        }
+      `,
+    });
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.6, -0.05, 0.01, 0.99] as const,
-      },
-    },
-  };
+    const geometry = new THREE.PlaneGeometry(1.8, 2.2, 50, 50);
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
 
-  const letterVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: 'easeOut' as const,
-      },
-    },
-  };
+    let targetX = 0.5;
+    let targetY = 0.5;
 
-  const imageVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotateY: -30 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      rotateY: 0,
-      transition: {
-        duration: 1.2,
-        ease: [0.6, -0.05, 0.01, 0.99] as const,
-        delay: 0.3,
-      },
-    },
-  };
+    const handleMouseMove = (e: MouseEvent) => {
+      targetX = e.clientX / window.innerWidth;
+      targetY = e.clientY / window.innerHeight;
+    };
 
-  const name = "Raj Kharel".split("");
-  const subtitle = "Your Trusted DMV Real Estate Expert".split("");
+    window.addEventListener('mousemove', handleMouseMove);
 
+    const animate = () => {
+      requestAnimationFrame(animate);
+
+      const currentX = material.uniforms.uMouse.value.x;
+      const currentY = material.uniforms.uMouse.value.y;
+      const newX = currentX + (targetX - currentX) * 0.1;
+      const newY = currentY + (targetY - currentY) * 0.1;
+
+      material.uniforms.uMouse.value.set(newX, newY);
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      camera.aspect = mount.clientWidth / mount.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(mount.clientWidth, mount.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
+      if (mount.contains(renderer.domElement)) {
+        mount.removeChild(renderer.domElement);
+      }
+      geometry.dispose();
+      material.dispose();
+      renderer.dispose();
+    };
+  }, []);
 
   return (
-    <section
-      id="hero"
-      style={{
-        position: 'relative',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        background: 'linear-gradient(135deg, #0a0f1e 0%, #1a2332 25%, #0f1729 50%, #1e2a3f 75%, #0a0f1e 100%)',
-        color: 'white',
-        overflow: 'hidden',
-        paddingTop: '80px',
-      }}
-    >
+    <section className="hero-section">
       <style>{`
-        @property --a {
-          syntax: "<percentage>";
-          initial-value: 0%;
-          inherits: true;
-        }
-
-        @property --hue {
-          syntax: "<angle>";
-          initial-value: 170deg;
-          inherits: false;
-        }
-
         @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-30px) rotate(8deg); }
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          33% { transform: translateY(-20px) rotate(2deg); }
+          66% { transform: translateY(10px) rotate(-2deg); }
         }
 
-        @keyframes pulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.8; }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes shimmer {
-          0% { background-position: -1000px 0; }
-          100% { background-position: 1000px 0; }
-        }
-
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-
-        @keyframes rotate {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @keyframes morphing {
-          0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-          50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-        }
-
-        @keyframes slideInLeft {
-          0% { transform: translateX(-100px); opacity: 0; }
-          100% { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideInRight {
-          0% { transform: translateX(100px); opacity: 0; }
-          100% { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes scaleUp {
-          0% { transform: scale(0.8); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes colorShift {
-          from { --hue: 170deg; }
-          to { --hue: 530deg; }
-        }
-
-        .hero-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 48px;
-          width: 100%;
+        .hero-section {
           position: relative;
-          z-index: 10;
-        }
-
-        .hero-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 80px;
+          min-height: 100vh;
+          display: flex;
           align-items: center;
-          min-height: 80vh;
-        }
-
-        .hero-content {
-          max-width: 600px;
-        }
-
-        .hero-name-wrapper {
-          margin-bottom: 10px;
+          justify-content: center;
+          background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #e8e8e8 100%);
           overflow: hidden;
         }
 
-        .hero-greeting {
-          font-size: 56px;
-          font-weight: 900;
-          line-height: 1;
-          background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          display: block;
-          margin-bottom: -55px;
-          animation: slideInLeft 0.8s ease-out 0.3s both;
-        }
-
-        .hero-name {
-          font-size: 80px;
-          font-weight: 900;
-          line-height: 1;
-          letter-spacing: -3px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-
-        .hero-name-letter {
-          display: inline-block;
-          background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          position: relative;
-        }
-
-        .hero-name-letter::after {
-          content: attr(data-letter);
+        .particles-canvas {
           position: absolute;
           top: 0;
           left: 0;
-          background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          opacity: 0;
-          transform: translateY(-100%);
-          transition: all 0.3s ease;
-        }
-
-        .hero-name-letter:hover::after {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        .hero-title {
-          font-size: 24px;
-          font-weight: 600;
-          line-height: 1.4;
-          margin-bottom: 32px;
-          display: inline-flex;
-          flex-wrap: wrap;
-          gap: 0;
-        }
-
-        .hero-title-letter {
-          display: inline-block;
-          background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          transition: all 0.3s ease;
-        }
-
-        .hero-title-letter:hover {
-          background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          transform: translateY(-4px);
-        }
-
-        .hero-description {
-          font-size: 18px;
-          line-height: 1.8;
-          color: rgba(203, 213, 225, 0.85);
-          margin-bottom: 48px;
-          max-width: 550px;
-          animation: slideInLeft 0.8s ease-out 0.5s both;
-        }
-
-        .hero-cta-group {
-          display: flex;
-          gap: 20px;
-          flex-wrap: wrap;
-          animation: slideInLeft 0.8s ease-out 0.7s both;
-        }
-
-        /* Gooey Button Effect */
-        .hero-cta-primary {
-          --a: 0%;
-          --hue: 210deg;
-          --x: 50;
-          --y: 50;
-          --button: hsl(var(--hue), 66%, 66%);
-          
-          background: transparent;
-          color: white;
-          padding: 40px 52px;
-          border-radius: 30px;
-          font-weight: 800;
-          font-size: 20px;
-          border: none;
-          cursor: pointer;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          position: relative;
-          animation: colorShift 20s linear infinite both;
-          transition: 
-            --a .5s ease-in-out, 
-            scale 1.66s linear(
-              0, 0.002, 0.01 0.9%, 0.038 1.8%, 0.156, 0.312 5.8%, 0.789 11.1%, 1.015 14.2%,
-              1.096, 1.157, 1.199, 1.224 20.3%, 1.231, 1.231, 1.226, 1.214 24.6%,
-              1.176 26.9%, 1.057 32.6%, 1.007 35.5%, 0.984, 0.968, 0.956, 0.949 42%,
-              0.946 44.1%, 0.95 46.5%, 0.998 57.2%, 1.007, 1.011 63.3%, 1.012 68.3%,
-              0.998 84%, 1
-            );
-          scale: 0.92;
-          isolation: isolate;
-        }
-
-        .hero-cta-primary:hover {
-          --a: 100%;
-          transition-duration: .5s, 1s;
-          box-shadow: none;
-          opacity: 1;
-          scale: 1;
-        }
-
-        .hero-cta-primary::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          filter: blur(12px) url(#goo) drop-shadow(0 .25em .5em hsla(0deg, 0%, 0%, 0.8));
-          background-image:
-            linear-gradient(0deg, var(--button), var(--button)),
-            radial-gradient(
-              40% 70% at calc(var(--x) * 1%) calc(var(--y) * 1%),
-              hsla(var(--hue), 77%, 77%, var(--a)) 0%,
-              transparent 90%
-            );
-          background-clip: content-box, border-box;
-          padding: 24px;
-          z-index: -1;
-          border: inherit;
-          animation: colorShift 20s linear infinite both;
-          border-radius: 3px;
-        }
-
-        .hero-cta-primary span {
-          position: relative;
-          z-index: 1;
-        }
-
-        .hero-cta-secondary {
-          background: transparent;
-          color: #a7adb4ff;
-          padding: 10px 40px;
-          border-radius: 5px;
-          font-weight: 800;
-          font-size: 16px;
-          border: 3px solid rgba(59, 130, 246, 0.4);
-          cursor: pointer;
-          transition: all 0.4s ease;
-          text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .hero-cta-secondary::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
           width: 100%;
           height: 100%;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));
-          transition: left 0.4s ease;
-        }
-
-        .hero-cta-secondary:hover::before {
-          left: 0;
-        }
-
-        .hero-cta-secondary:hover {
-          border-color: #3b82f6;
-          transform: translateY(-6px);
-          box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
-        }
-
-        .hero-cta-secondary span,
-        .hero-cta-secondary svg {
-          position: relative;
           z-index: 1;
+          margin-top: 50px;
         }
 
-        .hero-stats {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 40px;
-          margin-top: 60px;
-          padding-top: 30px;
-          border-top: 2px solid rgba(59, 130, 246, 0.2);
-          animation: slideInLeft 0.8s ease-out 0.9s both;
+        .wave-bg {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          z-index: 1;
+          opacity: 0.3;
         }
 
-        .stat-item {
-          text-align: center;
-          position: relative;
-          padding: 20px;
-          border-radius: 16px;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.02));
-          border: 1px solid rgba(59, 130, 246, 0.15);
-          transition: all 0.3s ease;
-        }
-
-        .stat-item:hover {
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
-          border-color: rgba(59, 130, 246, 0.3);
-          transform: translateY(-8px);
-          box-shadow: 0 15px 40px rgba(59, 130, 246, 0.2);
-        }
-
-        .stat-value {
-          font-size: 48px;
-          font-weight: 900;
-          background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: 8px;
-          display: block;
-        }
-
-        .stat-label {
-          font-size: 13px;
-          color: rgba(148, 163, 184, 0.9);
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        .hero-image-wrapper {
-          position: relative;
-          perspective: 1500px;
-        }
-
-        .hero-image-container {
-          position: relative;
-          border-radius: 40px;
-          overflow: hidden;
-          box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
-          transform-style: preserve-3d;
+        .wave {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(80px);
           animation: float 8s ease-in-out infinite;
         }
 
-        .hero-image-container::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(147, 197, 253, 0.2));
-          z-index: 1;
-          mix-blend-mode: overlay;
+        .wave-1 {
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(150, 150, 150, 0.15) 0%, transparent 70%);
+          top: -200px;
+          left: -100px;
+          animation-delay: 0s;
         }
 
-        .hero-image-container::after {
-          content: '';
-          position: absolute;
-          inset: -3px;
-          border-radius: 40px;
-          background: linear-gradient(45deg, #3b82f6, #2563eb, #1e40af, #60a5fa);
-          background-size: 300% 300%;
-          animation: gradientShift 5s ease infinite;
-          z-index: -1;
+        .wave-2 {
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, rgba(130, 130, 130, 0.12) 0%, transparent 70%);
+          bottom: -150px;
+          right: -100px;
+          animation-delay: 2s;
         }
 
-        .hero-image-glow {
+        .wave-3 {
+          width: 400px;
+          height: 400px;
+          background: radial-gradient(circle, rgba(110, 110, 110, 0.1) 0%, transparent 70%);
+          top: 50%;
+          right: 10%;
+          animation-delay: 4s;
+        }
+
+        .hero-container {
+          max-width: 1600px;
+          width: 100%;
+          padding: 0 50px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: relative;
+          z-index: 2;
+        }
+
+        .hero-content {
+          flex: 1;
+          animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+          font-size: 18px;
+          font-weight: 500;
+          color: rgba(80, 80, 80, 0.8);
+          letter-spacing: 2px;
+          margin-bottom: 20px;
+          text-transform: uppercase;
+        }
+
+        .hero-title {
+          font-size: 140px;
+          font-weight: 900;
+          line-height: 0.9;
+          color: #1a1a1a;
+          letter-spacing: -6px;
+          text-transform: uppercase;
+          margin: 0;
+          position: relative;
+          transition: transform 0.15s ease-out;
+          transform-style: preserve-3d;
+          will-change: transform;
+        }
+
+        .hero-3d-wrapper {
+          width: 600px;
+          height: 700px;
+          position: relative;
+        }
+
+        .scroll-indicator {
           position: absolute;
-          inset: -40px;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(37, 99, 235, 0.3));
-          border-radius: 60px;
-          filter: blur(60px);
-          opacity: 0.7;
-          z-index: -2;
-          animation: pulse 5s ease-in-out infinite, morphing 10s ease-in-out infinite;
+          bottom: 40px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 3;
+          text-align: center;
+          font-size: 14px;
+          color: rgba(100, 100, 100, 0.7);
+          letter-spacing: 1px;
+        }
+
+        .scroll-arrow {
+          position: relative;
+          width: 30px;
+          height: 50px;
+          margin: 10px auto 0;
+          border: 2px solid rgba(100, 100, 100, 0.3);
+          border-radius: 15px;
+        }
+
+        .scroll-arrow::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 7px solid transparent;
+          border-right: 7px solid transparent;
+          border-top: 12px solid rgba(100, 100, 100, 0.5);
+        }
+
+        @media (max-width: 1400px) {
+          .hero-title { font-size: 120px; }
+          .hero-3d-wrapper { width: 550px; height: 650px; }
+        }
+
+        @media (max-width: 1200px) {
+          .hero-title { font-size: 100px; }
+          .hero-3d-wrapper { width: 500px; height: 600px; }
         }
 
         @media (max-width: 1024px) {
-          .hero-grid {
-            grid-template-columns: 1fr;
-            gap: 60px;
-            text-align: center;
-          }
-
-          .hero-content {
-            max-width: 100%;
-            display: flex;
+          .hero-container {
             flex-direction: column;
-            align-items: center;
+            text-align: center;
+            padding: 0 30px;
           }
-
-          .hero-cta-group {
-            justify-content: center;
-          }
-
-          .hero-name {
-            font-size: 60px;
-            justify-content: center;
-          }
-
-          .hero-greeting {
-            font-size: 44px;
-          }
-
-          .hero-title {
-            justify-content: center;
-          }
+          .hero-content { margin-bottom: 40px; }
+          .hero-title { font-size: 80px; letter-spacing: -4px; }
+          .hero-3d-wrapper { width: 450px; height: 550px; }
         }
 
         @media (max-width: 768px) {
-          .hero-container {
-            padding: 0 24px;
-          }
+          .hero-title { font-size: 60px; letter-spacing: -3px; }
+          .hero-subtitle { font-size: 14px; }
+          .hero-3d-wrapper { width: 380px; height: 480px; }
+        }
 
-          .hero-name {
-            font-size: 48px;
-          }
-
-          .hero-greeting {
-            font-size: 36px;
-          }
-
-          .hero-title {
-            font-size: 20px;
-          }
-
-          .hero-description {
-            font-size: 16px;
-          }
-
-          .hero-stats {
-            grid-template-columns: 1fr;
-            gap: 24px;
-          }
-
-          .hero-cta-primary,
-          .hero-cta-secondary {
-            width: 100%;
-            justify-content: center;
-            padding: 16px 32px;
-          }
+        @media (max-width: 480px) {
+          .hero-title { font-size: 48px; letter-spacing: -2px; }
+          .hero-subtitle { font-size: 12px; }
+          .hero-3d-wrapper { width: 320px; height: 400px; }
         }
       `}</style>
 
-      {/* SVG Filter for Gooey Effect */}
-      <svg width="0" height="0" style={{ position: 'absolute' }}>
-        <filter id="goo" x="-50%" y="-50%" width="200%" height="200%">
-          <feComponentTransfer>
-            <feFuncA type="discrete" tableValues="0 1"></feFuncA>
-          </feComponentTransfer>
-          <feGaussianBlur stdDeviation="5"></feGaussianBlur>
-          <feComponentTransfer>
-            <feFuncA type="table" tableValues="-5 11"></feFuncA>
-          </feComponentTransfer>
-        </filter>
-      </svg>
+      <canvas ref={particlesRef} className="particles-canvas"></canvas>
 
-      {/* Enhanced Background Elements */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
-        <motion.div
-          style={{
-            position: 'absolute',
-            top: '5%',
-            right: '-5%',
-            width: '60%',
-            height: '60%',
-            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%)',
-            borderRadius: '50%',
-            filter: 'blur(100px)',
-          }}
-          animate={{
-            opacity: [0.3, 0.7, 0.3],
-            scale: [1, 1.3, 1],
-            x: [0, 80, 0],
-            y: [0, -60, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          style={{
-            position: 'absolute',
-            bottom: '5%',
-            left: '-5%',
-            width: '55%',
-            height: '55%',
-            background: 'radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%)',
-            borderRadius: '50%',
-            filter: 'blur(90px)',
-          }}
-          animate={{
-            opacity: [0.2, 0.6, 0.2],
-            scale: [1, 1.25, 1],
-            x: [0, -60, 0],
-            y: [0, 60, 0],
-          }}
-          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          style={{
-            position: 'absolute',
-            top: '40%',
-            left: '20%',
-            width: '40%',
-            height: '40%',
-            background: 'radial-gradient(circle, rgba(96, 165, 250, 0.12) 0%, transparent 70%)',
-            borderRadius: '50%',
-            filter: 'blur(80px)',
-          }}
-          animate={{
-            opacity: [0.2, 0.5, 0.2],
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360],
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px)`,
-            backgroundSize: '50px 50px',
-            opacity: 0.5,
-          }}
-        />
+      <div className="wave-bg">
+        <div className="wave wave-1"></div>
+        <div className="wave wave-2"></div>
+        <div className="wave wave-3"></div>
       </div>
 
-      <motion.div
-        className="hero-container"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        style={{ y, opacity }}
-      >
-        <div className="hero-grid">
-          {/* Left Content */}
-          <div className="hero-content">
-            <div className="hero-name-wrapper">
-              <span className="hero-greeting">Meet</span>
-              <motion.h1 className="hero-name" variants={containerVariants}>
-                {name.map((letter, index) => (
-                  <motion.span
-                    key={index}
-                    className="hero-name-letter"
-                    data-letter={letter}
-                    variants={letterVariants}
-                    custom={index}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    {letter}
-                  </motion.span>
-                ))}
-              </motion.h1>
-            </div>
-
-            <motion.div className="hero-title" variants={containerVariants}>
-              {subtitle.map((letter, index) => (
-                <motion.span
-                  key={index}
-                  className="hero-title-letter"
-                  variants={letterVariants}
-                  custom={index}
-                  transition={{ delay: 0.5 + index * 0.02 }}
-                >
-                  {letter === " " ? "\u00A0" : letter}
-                </motion.span>
-              ))}
-            </motion.div>
-
-            <motion.p className="hero-description" variants={itemVariants}>
-              With over years of experience serving DC, Maryland, and Virginia, I specialize in
-              helping clients buy and sell condos, townhouses, and single-family homes. Let me turn 
-              your real estate dreams into reality with personalized service and expert guidance.
-            </motion.p>
-
-            <motion.div className="hero-cta-group" variants={itemVariants}>
-              <Link href="/contact" className="hero-cta-primary" ref={gooeyButtonRef}>
-                <span>Schedule A Meet</span>
-              </Link>
-              <Link href="/listings" className="hero-cta-secondary">
-                <span>View Listings</span>
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-              </Link>
-            </motion.div>
-
-            <motion.div className="hero-stats" variants={containerVariants}>
-              {[
-                { value: '5+', label: 'Properties Sold' },
-                { value: '5/5', label: 'Client Rating' },
-                { value: '2+', label: 'Years Experience' },
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  className="stat-item"
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <span className="stat-value">{stat.value}</span>
-                  <span className="stat-label">{stat.label}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-
-          {/* Right Image */}
-          <motion.div
-            className="hero-image-wrapper"
-            variants={imageVariants}
-            whileHover={{ scale: 1.02, rotateY: 5 }}
-            transition={{ duration: 0.5 }}
+      <div className="hero-container">
+        <div className="hero-content">
+          <div className="hero-subtitle">VA Licensed Realtor</div>
+          <h1 
+            ref={titleRef}
+            className="hero-title"
+            style={{
+              transform: `
+                perspective(1000px)
+                rotateX(${mousePosition.y * -15}deg)
+                rotateY(${mousePosition.x * 15}deg)
+                translateZ(20px)
+              `
+            }}
           >
-            <div className="hero-image-glow" />
-            <div className="hero-image-container">
-              <Image
-                src="/image.png"
-                alt="Raj Kharel - Real Estate Professional"
-                width={600}
-                height={700}
-                priority
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
-            </div>
-          </motion.div>
+            RAJ<br />KHAREL
+          </h1>
         </div>
-      </motion.div>
+        <div className="hero-3d-wrapper" ref={mountRef}></div>
+      </div>
+
+      <div className="scroll-indicator">
+        <span>Scroll down</span>
+        <div className="scroll-arrow"></div>
+      </div>
     </section>
   );
 };

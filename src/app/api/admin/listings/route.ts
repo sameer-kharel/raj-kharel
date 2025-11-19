@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Basic validation to ensure required fields are present
-    const requiredFields = ['title', 'address', 'price', 'bedrooms', 'bathrooms', 'sqft', 'featuredImage'];
+    const requiredFields = ['title', 'address', 'price', 'bedrooms', 'bathrooms', 'sqft', 'images', 'description', 'features'];
     for (const field of requiredFields) {
-      if (!body[field]) {
+      if (!body[field] && body[field] !== 0 && body[field] !== false) { // Allow 0 for numbers, false for booleans if applicable
         return NextResponse.json({ error: `Missing required field: ${field}` }, { status: 400 });
       }
     }
@@ -41,9 +41,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Handle other validation errors
+    // Handle other validation errors from Mongoose
     if (error.name === 'ValidationError') {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      const errors: { [key: string]: string } = {};
+      for (const field in error.errors) {
+        errors[field] = error.errors[field].message;
+      }
+      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
     }
 
     // Generic server error

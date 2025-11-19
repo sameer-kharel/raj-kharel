@@ -4,11 +4,12 @@ import Listing from '@/models/Listing';
 
 export async function GET() {
   try {
-    await connectDB();
-    // Find only active listings and sort by newest first
+    await connectDB(); // ensures DB is fully connected
+
     const listings = await Listing.find({ status: 'active' })
       .sort({ createdAt: -1 })
-      .select('title address price bedrooms bathrooms sqft featuredImage');
+      .select('title address price bedrooms bathrooms sqft featuredImage description features');
+
     return NextResponse.json(listings);
   } catch (error) {
     console.error('[API GET /listings]', error);

@@ -8,7 +8,7 @@ export async function GET() {
     // Find only sold listings and sort by the date they were sold
     const properties = await Listing.find({ status: 'sold' })
       .sort({ soldDate: -1 })
-      .select('title address price soldPrice bedrooms bathrooms sqft featuredImage representation');
+      .select('title address price soldPrice bedrooms bathrooms sqft featuredImage representation description features');
     return NextResponse.json(properties);
   } catch (error) {
     console.error('[API GET /sold-properties]', error);

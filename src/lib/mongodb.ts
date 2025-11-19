@@ -14,20 +14,21 @@ if (!cached) {
 
 async function connectDB() {
   if (cached.conn) {
-    return cached.conn;
+    return cached.conn; // already connected
   }
 
   if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI as string).then((mongoose) => {
+      console.log('MongoDB connected');
       return mongoose;
+    }).catch((err) => {
+      console.error('MongoDB connection error:', err);
+      throw err;
     });
   }
+
   cached.conn = await cached.promise;
-  return cached.conn;
+  return cached.conn; // return the actual mongoose connection
 }
 
 export default connectDB;
