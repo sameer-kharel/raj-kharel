@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Basic validation to ensure required fields are present
-    const requiredFields = ['title', 'address', 'price', 'bedrooms', 'bathrooms', 'sqft', 'images', 'description', 'features'];
+    const requiredFields = ['title', 'address', 'price', 'bedrooms', 'bathrooms', 'sqft', 'featuredImage', 'description', 'features'];
     for (const field of requiredFields) {
-      if (!body[field] && body[field] !== 0 && body[field] !== false) { // Allow 0 for numbers, false for booleans if applicable
+      if (!body[field] && body[field] !== 0 && body[field] !== false) {
         return NextResponse.json({ error: `Missing required field: ${field}` }, { status: 400 });
       }
     }
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     if (error.code === 11000 && error.keyPattern?.address) {
       return NextResponse.json(
         { error: 'A listing with this address already exists. Please use a unique address.' },
-        { status: 409 } // 409 Conflict is more specific for this error
+        { status: 409 }
       );
     }
 

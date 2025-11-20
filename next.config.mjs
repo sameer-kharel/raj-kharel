@@ -8,6 +8,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'photos.zillowstatic.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

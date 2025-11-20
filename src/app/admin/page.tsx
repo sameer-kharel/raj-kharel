@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, FormEvent, ChangeEvent, ReactNode } from 'react';
-import Image from 'next/image'; // Import the Next.js Image component
+import Image from 'next/image';
 
 // --- TYPE DEFINITIONS ---
 interface Listing {
@@ -12,7 +12,9 @@ interface Listing {
   bedrooms: number;
   bathrooms: number;
   sqft: number;
-  featuredImage: string; // Add featuredImage to the interface
+  featuredImage: string;
+  description: string;
+  features: string[];
   status: 'active' | 'pending' | 'sold';
   soldPrice?: number;
   soldDate?: string;
@@ -32,15 +34,17 @@ const initialFormData = {
   bathrooms: 0,
   sqft: 0,
   featuredImage: '',
+  description: '',
+  features: [] as string[],
   status: 'active' as 'active' | 'pending',
 };
 
 // --- SVG ICONS ---
 const Icons = {
-  dashboard: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
-  listings: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>,
-  sold: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
-  add: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>,
+  dashboard: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
+  listings: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>,
+  sold: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  add: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>,
   dollar: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>,
 };
 
@@ -87,7 +91,7 @@ export default function AdminDashboardPage() {
       <div className="max-w-screen-xl mx-auto p-4 sm:p-6 lg:p-8">
         <header className="mb-10">
           <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="mt-2 text-lg text-slate-600">Welcome back! Here’s your real estate overview.</p>
+          <p className="mt-2 text-lg text-slate-600">Welcome back! Here's your real estate overview.</p>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -142,11 +146,10 @@ const StatCard = ({ label, value, icon, color }: { label: string; value: string 
 const TabButton = ({ name, tabId, activeTab, setActiveTab, icon }: { name: string, tabId: string, activeTab: string, setActiveTab: (id: string) => void, icon: ReactNode }) => (
   <button
     onClick={() => setActiveTab(tabId)}
-    className={`flex items-center gap-2 whitespace-nowrap py-3 px-4 text-sm font-medium transition-colors -mb-px border-b-2 ${
-      activeTab === tabId
-        ? 'border-blue-600 text-blue-600'
-        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-    }`}
+    className={`flex items-center gap-2 whitespace-nowrap py-3 px-4 text-sm font-medium transition-colors -mb-px border-b-2 ${activeTab === tabId
+      ? 'border-blue-600 text-blue-600'
+      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+      }`}
   >
     {icon} {name}
   </button>
@@ -281,10 +284,11 @@ const SoldPropertiesTab = ({ soldProperties }: { soldProperties: Listing[] }) =>
 
 const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
   const [formData, setFormData] = useState(initialFormData);
-  const [imageFile, setImageFile] = useState<File | null>(null); // State for the image file
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [featureInput, setFeatureInput] = useState('');
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: ['price', 'bedrooms', 'bathrooms', 'sqft'].includes(name) ? Number(value) : value }));
   };
@@ -293,6 +297,17 @@ const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
     }
+  };
+
+  const handleAddFeature = () => {
+    if (featureInput.trim()) {
+      setFormData(prev => ({ ...prev, features: [...prev.features, featureInput.trim()] }));
+      setFeatureInput('');
+    }
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    setFormData(prev => ({ ...prev, features: prev.features.filter((_, i) => i !== index) }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -334,9 +349,10 @@ const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
       }
 
       alert('Listing created successfully!');
-      setFormData(initialFormData); // Reset form
-      setImageFile(null); // Reset file input
-      onListingAdded(); // Refresh data and switch tab
+      setFormData(initialFormData);
+      setImageFile(null);
+      setFeatureInput('');
+      onListingAdded();
 
     } catch (error: any) {
       alert(`Error: ${error.message}`);
@@ -355,8 +371,21 @@ const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
           <input name="title" value={formData.title} onChange={handleChange} placeholder="Property Title" className={inputField} required />
           <input name="address" value={formData.address} onChange={handleChange} placeholder="Full Address" className={inputField} required />
         </div>
-        
-        {/* Updated Image Input */}
+
+        {/* Description Field */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Detailed property description"
+            className={inputField + " min-h-[120px] resize-y"}
+            required
+          />
+        </div>
+
+        {/* Image Input */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Featured Image</label>
           <input type="file" onChange={handleFileChange} accept="image/jpeg, image/png, image/webp" className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required />
@@ -369,6 +398,48 @@ const AddListingTab = ({ onListingAdded }: { onListingAdded: () => void }) => {
           <input name="bathrooms" type="number" value={formData.bathrooms} onChange={handleChange} placeholder="Baths" className={inputField} required />
           <input name="sqft" type="number" value={formData.sqft} onChange={handleChange} placeholder="Sq. Ft." className={inputField} required />
         </div>
+
+        {/* Features Field */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Features</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={featureInput}
+              onChange={(e) => setFeatureInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddFeature())}
+              placeholder="Add a feature (e.g., Pool, Garage)"
+              className={inputField}
+            />
+            <button
+              type="button"
+              onClick={handleAddFeature}
+              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 whitespace-nowrap"
+            >
+              Add
+            </button>
+          </div>
+          {formData.features.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {formData.features.map((feature, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+                >
+                  {feature}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFeature(index)}
+                    className="hover:text-blue-900"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="pt-2">
           <button type="submit" disabled={isSubmitting} className="inline-flex justify-center rounded-lg bg-blue-600 px-8 py-3 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
             {isSubmitting ? 'Uploading & Saving...' : 'Save Listing'}

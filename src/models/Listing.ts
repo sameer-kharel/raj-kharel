@@ -1,11 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IListingImage {
-  url: string;
-  caption?: string; // e.g., "kitchen", "dining room"
-  featured?: boolean;
-}
-
 export interface IListing extends Document {
   title: string;
   address: string;
@@ -13,31 +7,25 @@ export interface IListing extends Document {
   bedrooms: number;
   bathrooms: number;
   sqft: number;
-  images: IListingImage[]; // Array of image objects
-  description: string; // General description of the listing
-  features: string[]; // Array of features, e.g., "Hardwood floors", "Central AC"
+  featuredImage: string;
+  description: string;
+  features: string[];
   status: 'active' | 'pending' | 'sold';
   soldPrice?: number;
   soldDate?: Date;
   representation?: string;
 }
 
-const ListingImageSchema: Schema = new Schema({
-  url: { type: String, required: true },
-  caption: { type: String },
-  featured: { type: Boolean, default: false },
-});
-
 const ListingSchema: Schema = new Schema({
   title: { type: String, required: true },
-  address: { type: String, required: true },
+  address: { type: String, required: true, unique: true },
   price: { type: Number, required: true },
   bedrooms: { type: Number, required: true },
   bathrooms: { type: Number, required: true },
   sqft: { type: Number, required: true },
-  images: { type: [ListingImageSchema], default: [] }, // Array of image subdocuments
+  featuredImage: { type: String, required: true },
   description: { type: String, required: true },
-  features: { type: [String], default: [] }, // Array of strings
+  features: { type: [String], default: [] },
   status: { type: String, enum: ['active', 'pending', 'sold'], default: 'active' },
   soldPrice: { type: Number },
   soldDate: { type: Date },
