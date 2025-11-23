@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Facebook, Linkedin, Instagram } from 'lucide-react';
+import { Facebook, Linkedin, Instagram, Mail, Phone } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -12,7 +12,7 @@ const Footer = () => {
       backgroundColor: '#ffffff',
       color: '#111827',
       paddingTop: '80px',
-      paddingBottom: '80px',
+      paddingBottom: '40px',
       borderTop: '1px solid #f3f4f6',
       position: 'relative',
       overflow: 'hidden',
@@ -31,7 +31,7 @@ const Footer = () => {
           display: flex;
           flex-direction: column;
           gap: 48px;
-          margin-bottom: 80px;
+          margin-bottom: 60px;
         }
 
         /* Desktop Layout */
@@ -47,12 +47,12 @@ const Footer = () => {
           }
           
           .brand-section {
-            flex: 0 0 400px; /* Fixed width for brand to prevent squishing */
+            flex: 0 0 400px;
           }
           
           .links-section {
             display: flex;
-            gap: 80px; /* Generous spacing between link columns */
+            gap: 80px;
           }
         }
 
@@ -98,40 +98,9 @@ const Footer = () => {
         .footer-bottom {
           padding-top: 32px;
           border-top: 1px solid #f3f4f6;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          align-items: center;
-          gap: 16px;
           text-align: center;
         }
-        
-        @media (min-width: 768px) {
-          .footer-bottom {
-            flex-direction: row;
-            text-align: left;
-          }
-        }
 
-        .footer-bottom-links {
-          display: flex;
-          gap: 24px;
-          font-size: 13px;
-          font-weight: 500;
-          color: #6b7280;
-        }
-        
-        .footer-bottom-link {
-          color: #6b7280;
-          text-decoration: underline;
-          text-decoration-color: #d1d5db;
-          text-underline-offset: 4px;
-          transition: color 0.2s ease;
-        }
-        .footer-bottom-link:hover {
-          color: #000000;
-        }
-        
         .footer-column-title {
           font-weight: 700;
           margin-bottom: 24px;
@@ -146,6 +115,18 @@ const Footer = () => {
           display: flex;
           flex-direction: column;
           gap: 16px;
+        }
+
+        .contact-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #6b7280;
+          transition: color 0.2s ease;
+        }
+
+        .contact-item:hover {
+          color: #000000;
         }
       `}</style>
 
@@ -180,36 +161,39 @@ const Footer = () => {
             }}>
               Your trusted real estate professional in the DMV area. Specializing in condos, townhouses, and single-family homes with personalized service and local expertise.
             </p>
-            
+
             <div style={{ display: 'flex', gap: '20px', paddingTop: '8px' }}>
-              <a 
-                href="https://www.facebook.com/profile.php?id=61577176485106" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://www.facebook.com/profile.php?id=61577176485106"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="social-icon"
+                aria-label="Facebook"
               >
                 <Facebook size={22} strokeWidth={1.5} />
               </a>
-              <a 
-                href="https://www.instagram.com/rajkharelrealty/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://www.instagram.com/rajkharelrealty/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="social-icon"
+                aria-label="Instagram"
               >
                 <Instagram size={22} strokeWidth={1.5} />
               </a>
-              <a 
-                href="https://www.linkedin.com/in/raj-kharel-3954471b4/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://www.linkedin.com/in/raj-kharel-3954471b4/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="social-icon"
+                aria-label="LinkedIn"
               >
                 <Linkedin size={22} strokeWidth={1.5} />
               </a>
             </div>
           </div>
 
-          {/* Links Section (Grouped) */}
+          {/* Links Section */}
           <div className="links-section">
             <div className="footer-column">
               <h4 className="footer-column-title">Quick Links</h4>
@@ -229,17 +213,24 @@ const Footer = () => {
                 <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Sell a Home</Link></li>
                 <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Market Analysis</Link></li>
                 <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Consultation</Link></li>
-                <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Property Valuation</Link></li>
               </ul>
             </div>
 
             <div className="footer-column">
-              <h4 className="footer-column-title">Contact</h4>
+              <h4 className="footer-column-title">Get in Touch</h4>
               <ul className="footer-list">
-                <li><a href="tel:+17031234567" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>(703) 123-4567</a></li>
-                <li><a href="mailto:raj@dmvrealty.com" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>raj@dmvrealty.com</a></li>
-                <li style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', cursor: 'default' }}>Fairfax, VA 22030</li>
-                <li style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', cursor: 'default' }}>DMV Realty, INC.</li>
+                <li>
+                  <a href="tel:+17031234567" className="footer-link contact-item" style={{ fontSize: '14px', fontWeight: '500' }}>
+                    <Phone size={16} />
+                    <span>(703) 123-4567</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:raj@dmvrealty.com" className="footer-link contact-item" style={{ fontSize: '14px', fontWeight: '500' }}>
+                    <Mail size={16} />
+                    <span>raj@dmvrealty.com</span>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -248,16 +239,11 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="footer-bottom">
           <p style={{ color: '#6b7280', fontSize: '13px', fontWeight: '500', margin: 0 }}>
-            © {currentYear} Raj Kharel. All rights reserved. RAJ KHAREL
+            © {currentYear} Raj Kharel. All rights reserved.
           </p>
-          <div className="footer-bottom-links">
-            <Link href="/privacy" className="footer-bottom-link">Privacy Policy</Link>
-            <Link href="/terms" className="footer-bottom-link">Terms of Service</Link>
-            <Link href="/sitemap" className="footer-bottom-link">Cookies Settings</Link>
-          </div>
         </div>
       </div>
-      
+
       {/* Background Watermark (Subtle) */}
       <div style={{
         position: 'absolute',

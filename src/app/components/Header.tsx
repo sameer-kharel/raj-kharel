@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -22,8 +23,22 @@ const Header = () => {
     { name: 'Properties', href: '/properties', id: 'properties' },
     { name: 'Listings', href: '/listings', id: 'listings' },
     { name: 'Contact', href: '/contact', id: 'contact' },
-    { name: 'Tools', href: '/tools', id: 'tools' },
     { name: 'Reviews', href: '/reviews', id: 'reviews' },
+  ];
+
+  const calculatorTools = [
+    { name: 'Mortgage Calculator', href: '/calculators/mortgage', icon: '🏠' },
+    { name: 'Auto Loan Calculator', href: '/calculators/auto-loan', icon: '🚗' },
+    { name: 'Refinance Calculator', href: '/calculators/refinance', icon: '💰' },
+    { name: 'Loan Payment Calculator', href: '/calculators/loan-payment', icon: '💳' },
+    { name: 'APR Calculator', href: '/calculators/apr-calculator', icon: '📊' },
+    { name: 'Compound Interest', href: '/calculators/compound-interest', icon: '📈' },
+    { name: 'Credit Card Payoff', href: '/calculators/credit-card-payoff', icon: '💳' },
+    { name: 'Credit Utilization', href: '/calculators/credit-utilization', icon: '📉' },
+    { name: 'Debt Consolidation', href: '/calculators/debt-consolidation', icon: '🔄' },
+    { name: 'Income Tax Calculator', href: '/calculators/income-tax', icon: '💵' },
+    { name: 'Sales Tax Calculator', href: '/calculators/sales-tax', icon: '🧾' },
+    { name: 'Savings Goal Calculator', href: '/calculators/savings-goal', icon: '🎯' },
   ];
 
   const menuVariants = {
@@ -48,6 +63,106 @@ const Header = () => {
 
   return (
     <>
+      <style jsx>{`
+        .tools-dropdown {
+          position: relative;
+        }
+
+        .dropdown-menu {
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-top: 0.5rem;
+          background: white;
+          border-radius: 1rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          padding: 0.5rem;
+          min-width: 280px;
+          max-width: 320px;
+          z-index: 1000;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          border-radius: 0.75rem;
+          text-decoration: none;
+          color: #1f2937;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: all 0.2s;
+          cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+          background: #f3f4f6;
+          transform: translateX(4px);
+        }
+
+        .dropdown-icon {
+          font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+
+        .tools-button {
+          position: relative;
+          cursor: pointer;
+          font-size: clamp(2rem, 4vw, 2.5rem);
+          font-weight: bold;
+          color: white;
+          display: inline-block;
+          transition: transform 0.3s, color 0.3s;
+        }
+
+        .tools-button:hover {
+          transform: translateX(8px);
+          color: #e5e7eb;
+        }
+
+        .tools-indicator {
+          display: inline-block;
+          margin-left: 0.5rem;
+          transition: transform 0.3s;
+        }
+
+        .tools-indicator.open {
+          transform: rotate(180deg);
+        }
+
+        .tools-submenu {
+          margin-left: 2rem;
+          margin-top: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .submenu-item {
+          font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+          font-weight: 600;
+          color: #9ca3af;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          transition: all 0.3s;
+          padding: 0.5rem 0;
+        }
+
+        .submenu-item:hover {
+          color: white;
+          transform: translateX(8px);
+        }
+
+        .submenu-icon {
+          font-size: 1.5rem;
+        }
+      `}</style>
+
       {/* Navbar */}
       <nav style={{
         position: 'fixed',
@@ -65,8 +180,8 @@ const Header = () => {
           justifyContent: 'space-between'
         }}>
           {/* Logo */}
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             style={{
               fontSize: '1.5rem',
               fontWeight: 'bold',
@@ -78,11 +193,11 @@ const Header = () => {
             onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
           >
-            RAJ
+            RAJ KHAREL
           </Link>
 
           {/* Hamburger Button */}
-        {(!isMenuOpen) &&  <button
+          {(!isMenuOpen) && <button
             style={{
               background: 'white',
               borderRadius: '9999px',
@@ -146,7 +261,7 @@ const Header = () => {
               justifyContent: 'center',
               zIndex: 999,
               overflow: 'auto',
-              overflowX:"hidden"
+              overflowX: "hidden"
             }}
             variants={menuVariants}
             initial="closed"
@@ -182,12 +297,12 @@ const Header = () => {
               }}
               aria-label="Close menu"
             >
-              <svg 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -197,18 +312,18 @@ const Header = () => {
               </svg>
             </button>
 
-            <div style={{ 
-              padding: '2rem', 
+            <div style={{
+              padding: '2rem',
               width: '100%',
               maxHeight: '100vh',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <ul style={{ 
-                listStyle: 'none', 
-                padding: 0, 
-                margin: 0, 
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
                 textAlign: 'center',
                 width: '100%'
               }}>
@@ -246,9 +361,60 @@ const Header = () => {
                     </Link>
                   </motion.li>
                 ))}
+
+                {/* Tools Dropdown */}
+                <motion.li
+                  style={{ margin: '1rem 0' }}
+                  custom={navItems.length}
+                  variants={itemVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                >
+                  <div
+                    className="tools-button"
+                    onClick={() => setIsToolsOpen(!isToolsOpen)}
+                  >
+                    Tools
+                    <span className={`tools-indicator ${isToolsOpen ? 'open' : ''}`}>
+                      ▼
+                    </span>
+                  </div>
+
+                  <AnimatePresence>
+                    {isToolsOpen && (
+                      <motion.div
+                        className="tools-submenu"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {calculatorTools.map((tool, idx) => (
+                          <motion.div
+                            key={tool.href}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                          >
+                            <Link
+                              href={tool.href}
+                              className="submenu-item"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <span className="submenu-icon">{tool.icon}</span>
+                              {tool.name}
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.li>
+
                 <motion.li
                   style={{ marginTop: '2rem' }}
-                  custom={navItems.length}
+                  custom={navItems.length + 1}
                   variants={itemVariants}
                   initial="closed"
                   animate="open"

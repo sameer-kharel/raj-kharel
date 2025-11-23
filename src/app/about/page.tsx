@@ -16,7 +16,7 @@ const About = () => {
   const y2 = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const y3 = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
-  
+
   const smoothY1 = useSpring(y1, { stiffness: 100, damping: 30 });
   const smoothY2 = useSpring(y2, { stiffness: 100, damping: 30 });
 
@@ -147,37 +147,60 @@ const About = () => {
           border-radius: 24px;
           overflow: hidden;
           box-shadow: 0 25px 70px rgba(59, 130, 246, 0.25);
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-style: preserve-3d;
+          perspective: 1000px;
         }
 
         .image-container:hover {
-          transform: scale(1.02) rotate(1deg);
-          box-shadow: 0 35px 90px rgba(59, 130, 246, 0.35);
+          transform: scale(1.03) rotateY(2deg) rotateX(-2deg);
+          box-shadow: 0 40px 100px rgba(59, 130, 246, 0.4), 
+                      0 0 60px rgba(59, 130, 246, 0.2);
         }
 
         .image-container::before {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
           z-index: 1;
           opacity: 0;
-          transition: opacity 0.4s;
+          transition: opacity 0.5s;
         }
 
         .image-container:hover::before {
           opacity: 1;
         }
 
+        .image-container::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          background: linear-gradient(45deg, #3b82f6, #8b5cf6, #3b82f6);
+          background-size: 300% 300%;
+          border-radius: 24px;
+          z-index: -1;
+          opacity: 0;
+          animation: gradient-shift 3s ease infinite;
+          transition: opacity 0.5s;
+        }
+
+        .image-container:hover::after {
+          opacity: 0.6;
+        }
+
         .image-container img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          object-position: center 38%;
+          transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          filter: brightness(1) contrast(1.05);
         }
 
         .image-container:hover img {
-          transform: scale(1.05);
+          transform: scale(1.08);
+          filter: brightness(1.05) contrast(1.1);
         }
 
         .stats-grid {
@@ -367,19 +390,19 @@ const About = () => {
             >
               <div className="content-card">
                 <p className="content-text">
-                  Hi, I'm <strong>Raj Kharel</strong>, a dedicated real estate professional serving the DMV area 
-                  (DC, Maryland, and Virginia). With over 2 years of experience in the industry, I specialize in 
+                  Hi, I'm <strong>Raj Kharel</strong>, a dedicated real estate professional serving the DMV area
+                  (DC, Maryland, and Virginia). With over 2 years of experience in the industry, I specialize in
                   helping clients buy and sell condos, townhouses, and single-family homes.
                 </p>
                 <p className="content-text">
-                  My approach is simple: I listen to your needs, provide expert guidance, and work tirelessly to 
-                  ensure you achieve your real estate goals. Whether you're a first-time homebuyer, looking to upgrade, 
+                  My approach is simple: I listen to your needs, provide expert guidance, and work tirelessly to
+                  ensure you achieve your real estate goals. Whether you're a first-time homebuyer, looking to upgrade,
                   or selling your property, I'm here to make the process smooth and stress-free.
                 </p>
                 <p className="content-text" style={{ marginBottom: 0 }}>
-                  What sets me apart is my deep knowledge of the local market, strong negotiation skills, and commitment 
-                  to providing personalized service. I believe that buying or selling a home is more than just a 
-                  transaction—it's about building lasting relationships and helping you make one of the most important 
+                  What sets me apart is my deep knowledge of the local market, strong negotiation skills, and commitment
+                  to providing personalized service. I believe that buying or selling a home is more than just a
+                  transaction—it's about building lasting relationships and helping you make one of the most important
                   decisions of your life.
                 </p>
               </div>
@@ -388,22 +411,31 @@ const About = () => {
             {/* Image */}
             <motion.div
               variants={itemVariants}
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: 50, rotateY: -15 }}
+              whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1, type: "spring", stiffness: 50 }}
               style={{ y: y3 }}
             >
-              <div className="image-container">
+              <motion.div
+                className="image-container"
+                whileHover={{
+                  scale: 1.02,
+                  rotateY: 3,
+                  rotateX: -3,
+                  transition: { duration: 0.4 }
+                }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <Image
-                  src="/image.png"
+                  src="/raj-about.jpeg"
                   alt="Raj Kharel - Real Estate Agent"
                   width={600}
                   height={600}
                   style={{ width: '100%', height: '100%', display: 'block' }}
                   priority
                 />
-              </div>
+              </motion.div>
             </motion.div>
           </div>
 
