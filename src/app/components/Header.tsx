@@ -241,10 +241,10 @@ const Header = () => {
         left: 0,
         right: 0,
         zIndex: 999,
-        padding: '4rem 1rem'
+        padding: '1.5rem 2rem'
       }}>
         <div style={{
-          width: '100%',
+          maxWidth: '1400px',
           margin: '0 auto',
           display: 'flex',
           alignItems: 'center',
@@ -259,8 +259,7 @@ const Header = () => {
               color: '#111827',
               textDecoration: 'none',
               letterSpacing: '-0.025em',
-              transition: 'opacity 0.3s',
-              transform: 'translateX(-5rem)'
+              transition: 'opacity 0.3s'
             }}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
@@ -340,109 +339,59 @@ const Header = () => {
                 }}
               >
                 Tools
-                <motion.span
-                  animate={{ rotate: isToolsOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ fontSize: '0.75rem', display: 'inline-block' }}
-                >
-                  ▼
-                </motion.span>
+                <span style={{ fontSize: '0.75rem' }}>▼</span>
               </button>
 
               {/* Tools Dropdown Menu */}
-              <AnimatePresence>
-                {isToolsOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15, scale: 0.95, filter: "blur(10px)" }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      scale: 1,
-                      filter: "blur(0px)",
-                      transition: {
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 30,
-                        staggerChildren: 0.05,
-                        delayChildren: 0.1
-                      }
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: 15,
-                      scale: 0.95,
-                      filter: "blur(10px)",
-                      transition: { duration: 0.2 }
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: '120%',
-                      right: 0,
-                      background: 'rgba(255, 255, 255, 0.95)',
-                      backdropFilter: 'blur(20px)',
-                      borderRadius: '1.5rem',
-                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)',
-                      padding: '1.25rem',
-                      minWidth: '850px',
-                      zIndex: 1000,
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '0.75rem'
-                    }}
-                  >
-                    {calculatorTools.map((tool, index) => (
-                      <motion.div
-                        key={tool.href}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Link
-                          href={tool.href}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '1rem',
-                            padding: '1rem',
-                            borderRadius: '1rem',
-                            textDecoration: 'none',
-                            color: '#1f2937',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            transition: 'all 0.2s',
-                            background: 'transparent',
-                            border: '1px solid transparent'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'white';
-                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.05)';
-                            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.borderColor = 'transparent';
-                            e.currentTarget.style.boxShadow = 'none';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                          }}
-                        >
-                          <span style={{
-                            fontSize: '1.5rem',
-                            background: '#f3f4f6',
-                            width: '40px',
-                            height: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: '10px'
-                          }}>{tool.icon}</span>
-                          <span>{tool.name}</span>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {isToolsOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '0.5rem',
+                  background: 'white',
+                  borderRadius: '1rem',
+                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                  padding: '1rem',
+                  minWidth: '800px',
+                  zIndex: 1000,
+                  border: '1px solid rgba(0, 0, 0, 0.05)',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '0.75rem'
+                }}>
+                  {calculatorTools.map((tool) => (
+                    <Link
+                      key={tool.href}
+                      href={tool.href}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        padding: '0.875rem 1rem',
+                        borderRadius: '0.75rem',
+                        textDecoration: 'none',
+                        color: '#1f2937',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        transition: 'all 0.2s',
+                        background: 'transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#f3f4f6';
+                        e.currentTarget.style.transform = 'translateX(4px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }}
+                    >
+                      <span style={{ fontSize: '1.25rem' }}>{tool.icon}</span>
+                      <span>{tool.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
