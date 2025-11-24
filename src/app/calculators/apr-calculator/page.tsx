@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import CalculatorNavigation from '../../components/CalculatorNavigation';
 
 export default function APRCalculator() {
     const [loanAmount, setLoanAmount] = useState('');
@@ -31,70 +31,109 @@ export default function APRCalculator() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-                <Link href="/" className="inline-flex items-center text-orange-600 hover:text-orange-800 mb-8 transition-all hover:gap-3 gap-2 group">
-                    <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="calculator-page">
+            <style>{`
+                .calculator-page { min-height: 100vh; background: #ffffff; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+                .calculator-container { max-width: 800px; margin: 0 auto; }
+                .back-link { display: inline-flex; align-items: center; gap: 8px; color: #3b82f6; text-decoration: none; font-weight: 600; margin-bottom: 24px; font-size: 14px; transition: color 0.2s ease; }
+                .back-link:hover { color: #2563eb; }
+                .back-icon { width: 16px; height: 16px; }
+                .calculator-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+                .calculator-header { text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #f3f4f6; }
+                .calculator-icon { font-size: 48px; margin-bottom: 16px; }
+                .calculator-title { font-size: 28px; font-weight: 700; color: #1f2937; margin: 0 0 8px 0; }
+                .calculator-subtitle { color: #6b7280; font-size: 15px; margin: 0; }
+                .form-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 24px; }
+                .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+                .form-group { display: flex; flex-direction: column; gap: 8px; }
+                .form-label { font-size: 14px; font-weight: 600; color: #374151; }
+                .required { color: #ef4444; }
+                .input-wrapper { position: relative; }
+                .input-prefix, .input-suffix { position: absolute; top: 50%; transform: translateY(-50%); color: #9ca3af; font-weight: 500; font-size: 14px; }
+                .input-prefix { left: 12px; }
+                .input-suffix { right: 12px; }
+                .form-input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 15px; background: #f9fafb; transition: all 0.2s ease; outline: none; color: #1f2937; }
+                .form-input:hover { background: white; border-color: #9ca3af; }
+                .form-input:focus { background: white; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+                .form-input.has-prefix { padding-left: 32px; }
+                .form-input.has-suffix { padding-right: 60px; }
+                .form-input::placeholder { color: #9ca3af; font-size: 14px; }
+                .calculate-button { width: 100%; padding: 14px; background: #3b82f6; color: white; font-size: 16px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+                .calculate-button:hover { background: #2563eb; }
+                .calculate-button:active { transform: scale(0.98); }
+                .result-card { margin-top: 24px; padding: 24px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; text-align: center; }
+                .result-label { color: #1e40af; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+                .result-value { color: #1e3a8a; font-size: 36px; font-weight: 700; margin: 0; }
+                @media (max-width: 768px) {
+                    .calculator-card { padding: 24px; }
+                    .calculator-title { font-size: 24px; }
+                    .form-grid-2 { grid-template-columns: 1fr; }
+                    .result-value { font-size: 32px; }
+                }
+            `}</style>
+
+            <div className="calculator-container">
+                <Link href="/" className="back-link">
+                    <svg className="back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    <span className="font-semibold">Back to Home</span>
+                    <span>Back to Home</span>
                 </Link>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 border border-white/20">
-                    <div className="text-center mb-10">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl mb-4 shadow-lg">
-                            <span className="text-4xl">📊</span>
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mb-3">APR Calculator</h1>
-                        <p className="text-gray-600 text-lg">Calculate the Annual Percentage Rate</p>
+                <div className="calculator-card">
+                    <CalculatorNavigation currentPath="/calculators/apr-calculator" />
+
+                    <div className="calculator-header">
+                        <div className="calculator-icon">📊</div>
+                        <h1 className="calculator-title">APR Calculator</h1>
+                        <p className="calculator-subtitle">Calculate the Annual Percentage Rate</p>
                     </div>
 
-                    <div className="space-y-6 mb-8">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">Loan Amount <span className="text-red-500">*</span></label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
-                                <input type="number" className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-gray-50 hover:bg-white" placeholder="10,000" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} />
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label className="form-label">Loan Amount <span className="required">*</span></label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="10,000" value={loanAmount} onChange={(e) => setLoanAmount(e.target.value)} />
                             </div>
                         </div>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Interest Rate <span className="text-red-500">*</span></label>
-                                <div className="relative">
-                                    <input type="number" step="0.01" className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-gray-50 hover:bg-white" placeholder="6.5" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">%</span>
+
+                        <div className="form-grid-2">
+                            <div className="form-group">
+                                <label className="form-label">Interest Rate <span className="required">*</span></label>
+                                <div className="input-wrapper">
+                                    <input type="number" step="0.01" className="form-input has-suffix" placeholder="6.5" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} />
+                                    <span className="input-suffix">%</span>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Loan Term <span className="text-red-500">*</span></label>
-                                <div className="relative">
-                                    <input type="number" className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-gray-50 hover:bg-white" placeholder="3" value={loanTerm} onChange={(e) => setLoanTerm(e.target.value)} />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">years</span>
+
+                            <div className="form-group">
+                                <label className="form-label">Loan Term <span className="required">*</span></label>
+                                <div className="input-wrapper">
+                                    <input type="number" className="form-input has-suffix" placeholder="3" value={loanTerm} onChange={(e) => setLoanTerm(e.target.value)} />
+                                    <span className="input-suffix">years</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">Additional Fees</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
-                                <input type="number" className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-gray-50 hover:bg-white" placeholder="500" value={fees} onChange={(e) => setFees(e.target.value)} />
+
+                        <div className="form-group">
+                            <label className="form-label">Additional Fees</label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="500" value={fees} onChange={(e) => setFees(e.target.value)} />
                             </div>
                         </div>
                     </div>
 
-                    <button onClick={calculateAPR} className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold py-5 px-8 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl">
-                        <span className="text-lg">Calculate APR</span>
-                    </button>
+                    <button onClick={calculateAPR} className="calculate-button">Calculate APR</button>
 
                     {showResult && apr && (
-                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-8 p-8 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl shadow-lg">
-                            <div className="text-center">
-                                <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Annual Percentage Rate (APR)</p>
-                                <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }} className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{apr}</motion.p>
-                            </div>
-                        </motion.div>
+                        <div className="result-card">
+                            <p className="result-label">Annual Percentage Rate (APR)</p>
+                            <p className="result-value">{apr}</p>
+                        </div>
                     )}
-                </motion.div>
+                </div>
             </div>
         </div>
     );

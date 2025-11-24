@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import CalculatorNavigation from '../../components/CalculatorNavigation';
 
 export default function MortgageCalculator() {
     const [homeValue, setHomeValue] = useState('');
@@ -38,40 +38,253 @@ export default function MortgageCalculator() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-                <Link href="/" className="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-8 transition-all hover:gap-3 gap-2 group">
-                    <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="calculator-page">
+            <style>{`
+                .calculator-page {
+                    min-height: 100vh;
+                    background: #ffffff;
+                    padding: 40px 20px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                }
+
+                .calculator-container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+
+                .back-link {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #3b82f6;
+                    text-decoration: none;
+                    font-weight: 600;
+                    margin-bottom: 24px;
+                    font-size: 14px;
+                    transition: color 0.2s ease;
+                }
+
+                .back-link:hover {
+                    color: #2563eb;
+                }
+
+                .back-icon {
+                    width: 16px;
+                    height: 16px;
+                }
+
+                .calculator-card {
+                    background: white;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    padding: 40px;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+
+                .calculator-header {
+                    text-align: center;
+                    margin-bottom: 32px;
+                    padding-bottom: 24px;
+                    border-bottom: 1px solid #f3f4f6;
+                }
+
+                .calculator-icon {
+                    font-size: 48px;
+                    margin-bottom: 16px;
+                }
+
+                .calculator-title {
+                    font-size: 28px;
+                    font-weight: 700;
+                    color: #1f2937;
+                    margin: 0 0 8px 0;
+                }
+
+                .calculator-subtitle {
+                    color: #6b7280;
+                    font-size: 15px;
+                    margin: 0;
+                }
+
+                .form-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 20px;
+                    margin-bottom: 24px;
+                }
+
+                .form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .form-label {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #374151;
+                }
+
+                .required {
+                    color: #ef4444;
+                }
+
+                .input-wrapper {
+                    position: relative;
+                }
+
+                .input-prefix,
+                .input-suffix {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #9ca3af;
+                    font-weight: 500;
+                    font-size: 14px;
+                }
+
+                .input-prefix {
+                    left: 12px;
+                }
+
+                .input-suffix {
+                    right: 12px;
+                }
+
+                .form-input {
+                    width: 100%;
+                    padding: 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    font-size: 15px;
+                    background: #f9fafb;
+                    transition: all 0.2s ease;
+                    outline: none;
+                    color: #1f2937;
+                }
+
+                .form-input:hover {
+                    background: white;
+                    border-color: #9ca3af;
+                }
+
+                .form-input:focus {
+                    background: white;
+                    border-color: #3b82f6;
+                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                }
+
+                .form-input.has-prefix {
+                    padding-left: 32px;
+                }
+
+                .form-input.has-suffix {
+                    padding-right: 60px;
+                }
+
+                .form-input::placeholder {
+                    color: #9ca3af;
+                    font-size: 14px;
+                }
+
+                .calculate-button {
+                    width: 100%;
+                    padding: 14px;
+                    background: #3b82f6;
+                    color: white;
+                    font-size: 16px;
+                    font-weight: 600;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .calculate-button:hover {
+                    background: #2563eb;
+                }
+
+                .calculate-button:active {
+                    transform: scale(0.98);
+                }
+
+                .result-card {
+                    margin-top: 24px;
+                    padding: 24px;
+                    background: #eff6ff;
+                    border: 1px solid #bfdbfe;
+                    border-radius: 8px;
+                    text-align: center;
+                }
+
+                .result-label {
+                    color: #1e40af;
+                    font-size: 13px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 8px;
+                }
+
+                .result-value {
+                    color: #1e3a8a;
+                    font-size: 36px;
+                    font-weight: 700;
+                    margin: 0;
+                }
+
+                .result-note {
+                    color: #3b82f6;
+                    font-size: 13px;
+                    margin-top: 8px;
+                }
+
+                @media (max-width: 768px) {
+                    .calculator-card {
+                        padding: 24px;
+                    }
+
+                    .calculator-title {
+                        font-size: 24px;
+                    }
+
+                    .form-grid {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .result-value {
+                        font-size: 32px;
+                    }
+                }
+            `}</style>
+
+            <div className="calculator-container">
+                <Link href="/" className="back-link">
+                    <svg className="back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    <span className="font-semibold">Back to Home</span>
+                    <span>Back to Home</span>
                 </Link>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 border border-white/20"
-                >
-                    <div className="text-center mb-10">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
-                            <span className="text-4xl">🏠</span>
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
-                            Mortgage Calculator
-                        </h1>
-                        <p className="text-gray-600 text-lg">Calculate your estimated monthly mortgage payment</p>
+                <div className="calculator-card">
+                    <CalculatorNavigation currentPath="/calculators/mortgage" />
+
+                    <div className="calculator-header">
+                        <div className="calculator-icon">🏠</div>
+                        <h1 className="calculator-title">Mortgage Calculator</h1>
+                        <p className="calculator-subtitle">Calculate your estimated monthly mortgage payment</p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 mb-8">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Home Value <span className="text-red-500">*</span>
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label className="form-label">
+                                Home Value <span className="required">*</span>
                             </label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
                                 <input
                                     type="number"
-                                    className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                    className="form-input has-prefix"
                                     placeholder="350,000"
                                     value={homeValue}
                                     onChange={(e) => setHomeValue(e.target.value)}
@@ -79,15 +292,15 @@ export default function MortgageCalculator() {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Down Payment <span className="text-red-500">*</span>
+                        <div className="form-group">
+                            <label className="form-label">
+                                Down Payment <span className="required">*</span>
                             </label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
                                 <input
                                     type="number"
-                                    className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                    className="form-input has-prefix"
                                     placeholder="70,000"
                                     value={downPayment}
                                     onChange={(e) => setDownPayment(e.target.value)}
@@ -95,48 +308,46 @@ export default function MortgageCalculator() {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Loan Term <span className="text-red-500">*</span>
+                        <div className="form-group">
+                            <label className="form-label">
+                                Loan Term <span className="required">*</span>
                             </label>
-                            <div className="relative">
+                            <div className="input-wrapper">
                                 <input
                                     type="number"
-                                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                    className="form-input has-suffix"
                                     placeholder="30"
                                     value={loanTerm}
                                     onChange={(e) => setLoanTerm(e.target.value)}
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">years</span>
+                                <span className="input-suffix">years</span>
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Interest Rate <span className="text-red-500">*</span>
+                        <div className="form-group">
+                            <label className="form-label">
+                                Interest Rate <span className="required">*</span>
                             </label>
-                            <div className="relative">
+                            <div className="input-wrapper">
                                 <input
                                     type="number"
                                     step="0.01"
-                                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                    className="form-input has-suffix"
                                     placeholder="4.5"
                                     value={interestRate}
                                     onChange={(e) => setInterestRate(e.target.value)}
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">%</span>
+                                <span className="input-suffix">%</span>
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Annual Property Tax
-                            </label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                        <div className="form-group">
+                            <label className="form-label">Annual Property Tax</label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
                                 <input
                                     type="number"
-                                    className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                    className="form-input has-prefix"
                                     placeholder="3,000"
                                     value={propertyTax}
                                     onChange={(e) => setPropertyTax(e.target.value)}
@@ -144,15 +355,13 @@ export default function MortgageCalculator() {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                Annual Home Insurance
-                            </label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                        <div className="form-group">
+                            <label className="form-label">Annual Home Insurance</label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
                                 <input
                                     type="number"
-                                    className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 hover:bg-white"
+                                    className="form-input has-prefix"
                                     placeholder="1,200"
                                     value={homeInsurance}
                                     onChange={(e) => setHomeInsurance(e.target.value)}
@@ -161,34 +370,18 @@ export default function MortgageCalculator() {
                         </div>
                     </div>
 
-                    <button
-                        onClick={calculateMortgage}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
-                    >
-                        <span className="text-lg">Calculate Monthly Payment</span>
+                    <button onClick={calculateMortgage} className="calculate-button">
+                        Calculate Monthly Payment
                     </button>
 
                     {showResult && monthlyPayment && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="mt-8 p-8 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl shadow-lg"
-                        >
-                            <div className="text-center">
-                                <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Estimated Monthly Payment</p>
-                                <motion.p
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ delay: 0.2, type: "spring" }}
-                                    className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent"
-                                >
-                                    {monthlyPayment}
-                                </motion.p>
-                                <p className="text-sm text-gray-500 mt-3">Including principal, interest, taxes, and insurance</p>
-                            </div>
-                        </motion.div>
+                        <div className="result-card">
+                            <p className="result-label">Estimated Monthly Payment</p>
+                            <p className="result-value">{monthlyPayment}</p>
+                            <p className="result-note">Including principal, interest, taxes, and insurance</p>
+                        </div>
                     )}
-                </motion.div>
+                </div>
             </div>
         </div>
     );

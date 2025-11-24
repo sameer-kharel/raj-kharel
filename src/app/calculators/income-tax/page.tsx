@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import CalculatorNavigation from '../../components/CalculatorNavigation';
+import '../calculator-styles.css';
 
 export default function IncomeTaxCalculator() {
     const [income, setIncome] = useState('');
@@ -49,67 +50,61 @@ export default function IncomeTaxCalculator() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-                <Link href="/" className="inline-flex items-center text-slate-600 hover:text-slate-800 mb-8 transition-all hover:gap-3 gap-2 group">
-                    <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="calculator-page">
+            <div className="calculator-container">
+                <Link href="/" className="back-link">
+                    <svg className="back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    <span className="font-semibold">Back to Home</span>
+                    <span>Back to Home</span>
                 </Link>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 border border-white/20">
-                    <div className="text-center mb-10">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-slate-500 to-gray-600 rounded-2xl mb-4 shadow-lg">
-                            <span className="text-4xl">💵</span>
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-600 to-gray-600 bg-clip-text text-transparent mb-3">Income Tax Calculator</h1>
-                        <p className="text-gray-600 text-lg">Estimate your federal income tax (2024 rates)</p>
+                <div className="calculator-card">
+                    <CalculatorNavigation currentPath="/calculators/income-tax" />
+
+                    <div className="calculator-header">
+                        <div className="calculator-icon">💵</div>
+                        <h1 className="calculator-title">Income Tax Calculator</h1>
+                        <p className="calculator-subtitle">Estimate your federal income tax (2024 rates)</p>
                     </div>
 
-                    <div className="space-y-6 mb-8">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">Gross Annual Income <span className="text-red-500">*</span></label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
-                                <input type="number" className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all bg-gray-50 hover:bg-white" placeholder="75,000" value={income} onChange={(e) => setIncome(e.target.value)} />
+                    <div className="form-grid-single">
+                        <div className="form-group">
+                            <label className="form-label">Gross Annual Income <span className="required">*</span></label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="75,000" value={income} onChange={(e) => setIncome(e.target.value)} />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">Total Deductions</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
-                                <input type="number" className="w-full pl-8 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all bg-gray-50 hover:bg-white" placeholder="13,850 (standard deduction)" value={deductions} onChange={(e) => setDeductions(e.target.value)} />
+
+                        <div className="form-group">
+                            <label className="form-label">Total Deductions</label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="13,850" value={deductions} onChange={(e) => setDeductions(e.target.value)} />
                             </div>
                         </div>
                     </div>
 
-                    <button onClick={calculateTax} className="w-full bg-gradient-to-r from-slate-600 to-gray-600 hover:from-slate-700 hover:to-gray-700 text-white font-bold py-5 px-8 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl">
-                        <span className="text-lg">Calculate Tax</span>
-                    </button>
+                    <button onClick={calculateTax} className="calculate-button">Calculate Tax</button>
 
                     {showResult && result && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8 space-y-4">
-                            <div className="grid md:grid-cols-3 gap-4">
-                                <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
-                                    <p className="text-xs text-gray-600 mb-1">Taxable Income</p>
-                                    <p className="text-2xl font-bold text-blue-600">{result.taxable}</p>
-                                </div>
-                                <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
-                                    <p className="text-xs text-gray-600 mb-1">Estimated Tax</p>
-                                    <p className="text-2xl font-bold text-red-600">{result.tax}</p>
-                                </div>
-                                <div className="p-4 bg-purple-50 border-2 border-purple-200 rounded-xl">
-                                    <p className="text-xs text-gray-600 mb-1">Effective Rate</p>
-                                    <p className="text-2xl font-bold text-purple-600">{result.effective}</p>
-                                </div>
+                        <div className="result-grid-3">
+                            <div className="result-item">
+                                <p className="result-item-label">Taxable Income</p>
+                                <p className="result-item-value">{result.taxable}</p>
                             </div>
-                            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                <p className="text-xs text-gray-600"><strong>⚠️ Note:</strong> This is a simplified calculation using 2024 federal tax brackets for single filers. Actual tax may vary based on filing status, credits, and other factors.</p>
+                            <div className="result-item">
+                                <p className="result-item-label">Estimated Tax</p>
+                                <p className="result-item-value">{result.tax}</p>
                             </div>
-                        </motion.div>
+                            <div className="result-item">
+                                <p className="result-item-label">Effective Rate</p>
+                                <p className="result-item-value">{result.effective}</p>
+                            </div>
+                        </div>
                     )}
-                </motion.div>
+                </div>
             </div>
         </div>
     );

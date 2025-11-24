@@ -28,7 +28,6 @@ const Header = () => {
 
   const calculatorTools = [
     { name: 'Mortgage Calculator', href: '/calculators/mortgage', icon: '🏠' },
-    { name: 'Auto Loan Calculator', href: '/calculators/auto-loan', icon: '🚗' },
     { name: 'Refinance Calculator', href: '/calculators/refinance', icon: '💰' },
     { name: 'Loan Payment Calculator', href: '/calculators/loan-payment', icon: '💳' },
     { name: 'APR Calculator', href: '/calculators/apr-calculator', icon: '📊' },
@@ -135,31 +134,103 @@ const Header = () => {
 
         .tools-submenu {
           margin-left: 2rem;
-          margin-top: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
+          margin-top: 2rem;
+          padding: 2rem;
+          background: rgba(15, 15, 25, 0.95);
+          border-radius: 24px;
+          border: 2px solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+          max-width: 1300px;
         }
 
-        .submenu-item {
-          font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-          font-weight: 600;
-          color: #9ca3af;
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          transition: all 0.3s;
-          padding: 0.5rem 0;
+        .tools-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
         }
 
-        .submenu-item:hover {
-          color: white;
-          transform: translateX(8px);
+        a.submenu-item {
+          display: flex !important;
+          align-items: center !important;
+          gap: 0.875rem !important;
+          padding: 1rem 1.25rem !important;
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15)) !important;
+          border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+          border-radius: 14px !important;
+          color: #f0f0f0 !important;
+          text-decoration: none !important;
+          font-size: 0.9rem !important;
+          font-weight: 600 !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          position: relative !important;
+          overflow: hidden !important;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+          cursor: pointer !important;
+        }
+
+        a.submenu-item::before {
+          content: '' !important;
+          position: absolute !important;
+          inset: 0 !important;
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(147, 51, 234, 0.35)) !important;
+          opacity: 0 !important;
+          transition: opacity 0.3s !important;
+        }
+
+        a.submenu-item:hover::before {
+          opacity: 1 !important;
+        }
+
+        a.submenu-item:hover {
+          transform: translateY(-4px) !important;
+          box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5) !important;
+          border-color: rgba(255, 255, 255, 0.5) !important;
+          color: #ffffff !important;
         }
 
         .submenu-icon {
-          font-size: 1.5rem;
+          font-size: 1.5rem !important;
+          position: relative !important;
+          z-index: 1 !important;
+          flex-shrink: 0 !important;
+        }
+
+        .submenu-item-text {
+          position: relative !important;
+          z-index: 1 !important;
+          white-space: nowrap !important;
+        }
+
+        @media (max-width: 1200px) {
+          .tools-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 900px) {
+          .tools-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          
+          .tools-submenu {
+            margin-left: 1rem;
+            padding: 1.5rem;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .tools-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .tools-submenu {
+            padding: 1rem;
+          }
+          
+          a.submenu-item {
+            font-size: 0.85rem !important;
+            padding: 0.875rem 1rem !important;
+          }
         }
       `}</style>
 
@@ -196,261 +267,306 @@ const Header = () => {
             RAJ KHAREL
           </Link>
 
-          {/* Hamburger Button */}
-          {(!isMenuOpen) && <button
-            style={{
-              background: 'white',
-              borderRadius: '9999px',
-              padding: '1rem',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'box-shadow 0.3s'
-            }}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'}
-            onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'}
-            aria-label="Toggle menu"
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', width: '1.5rem' }}>
-              <span style={{
-                display: 'block',
-                height: '2px',
-                background: '#111827',
-                borderRadius: '9999px',
-                transition: 'all 0.3s',
-                transform: isMenuOpen ? 'rotate(45deg) translateY(8px)' : 'none'
-              }}></span>
-              <span style={{
-                display: 'block',
-                height: '2px',
-                background: '#111827',
-                borderRadius: '9999px',
-                transition: 'all 0.3s',
-                opacity: isMenuOpen ? 0 : 1
-              }}></span>
-              <span style={{
-                display: 'block',
-                height: '2px',
-                background: '#111827',
-                borderRadius: '9999px',
-                transition: 'all 0.3s',
-                transform: isMenuOpen ? 'rotate(-45deg) translateY(-8px)' : 'none'
-              }}></span>
-            </div>
-          </button>}
-        </div>
-      </nav>
-
-      {/* Full-screen Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              width: '100%',
-              height: '100vh',
-              background: 'black',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 999,
-              overflow: 'auto',
-              overflowX: "hidden"
-            }}
-            variants={menuVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
-          >
-            {/* Close Button */}
-            <button
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Hamburger Button */}
+            {(!isMenuOpen) && <button
               style={{
-                position: 'absolute',
-                top: '2rem',
-                right: '2rem',
                 background: 'white',
                 borderRadius: '9999px',
                 padding: '1rem',
-                boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                 border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'all 0.3s',
-                zIndex: 1000
+                transition: 'box-shadow 0.3s'
               }}
-              onClick={() => setIsMenuOpen(false)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.1)';
-                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(255, 255, 255, 0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(255, 255, 255, 0.1)';
-              }}
-              aria-label="Close menu"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'}
+              aria-label="Toggle menu"
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', width: '1.5rem' }}>
+                <span style={{
+                  display: 'block',
+                  height: '2px',
+                  background: '#111827',
+                  borderRadius: '9999px',
+                  transition: 'all 0.3s',
+                  transform: isMenuOpen ? 'rotate(45deg) translateY(8px)' : 'none'
+                }}></span>
+                <span style={{
+                  display: 'block',
+                  height: '2px',
+                  background: '#111827',
+                  borderRadius: '9999px',
+                  transition: 'all 0.3s',
+                  opacity: isMenuOpen ? 0 : 1
+                }}></span>
+                <span style={{
+                  display: 'block',
+                  height: '2px',
+                  background: '#111827',
+                  borderRadius: '9999px',
+                  transition: 'all 0.3s',
+                  transform: isMenuOpen ? 'rotate(-45deg) translateY(-8px)' : 'none'
+                }}></span>
+              </div>
+            </button>}
 
-            <div style={{
-              padding: '2rem',
-              width: '100%',
-              maxHeight: '100vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <ul style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                textAlign: 'center',
-                width: '100%'
+            {/* Tools Dropdown in Header */}
+            <div
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setIsToolsOpen(true)}
+              onMouseLeave={() => setIsToolsOpen(false)}
+            >
+              <button
+                style={{
+                  background: 'white',
+                  borderRadius: '9999px',
+                  padding: '0.75rem 1.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  transition: 'all 0.3s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                Tools
+                <span style={{ fontSize: '0.75rem' }}>▼</span>
+              </button>
+
+              {/* Tools Dropdown Menu */}
+              {isToolsOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '0.5rem',
+                  background: 'white',
+                  borderRadius: '1rem',
+                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                  padding: '1rem',
+                  minWidth: '800px',
+                  zIndex: 1000,
+                  border: '1px solid rgba(0, 0, 0, 0.05)',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '0.75rem'
+                }}>
+                  {calculatorTools.map((tool) => (
+                    <Link
+                      key={tool.href}
+                      href={tool.href}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        padding: '0.875rem 1rem',
+                        borderRadius: '0.75rem',
+                        textDecoration: 'none',
+                        color: '#1f2937',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        transition: 'all 0.2s',
+                        background: 'transparent'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#f3f4f6';
+                        e.currentTarget.style.transform = 'translateX(4px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }}
+                    >
+                      <span style={{ fontSize: '1.25rem' }}>{tool.icon}</span>
+                      <span>{tool.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div >
+      </nav >
+
+      {/* Full-screen Menu */}
+      <AnimatePresence>
+        {
+          isMenuOpen && (
+            <motion.div
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                width: '100%',
+                height: '100vh',
+                background: 'black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 999,
+                overflow: 'auto',
+                overflowX: "hidden"
+              }}
+              variants={menuVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
+            >
+              {/* Close Button */}
+              <button
+                style={{
+                  position: 'absolute',
+                  top: '2rem',
+                  right: '2rem',
+                  background: 'white',
+                  borderRadius: '9999px',
+                  padding: '1rem',
+                  boxShadow: '0 10px 15px -3px rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s',
+                  zIndex: 1000
+                }}
+                onClick={() => setIsMenuOpen(false)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                  e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(255, 255, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(255, 255, 255, 0.1)';
+                }}
+                aria-label="Close menu"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+
+              <div style={{
+                padding: '2rem',
+                width: '100%',
+                maxHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                {navItems.map((item, index) => (
+                <ul style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0,
+                  textAlign: 'center',
+                  width: '100%'
+                }}>
+                  {navItems.map((item, index) => (
+                    <motion.li
+                      key={item.id}
+                      style={{ margin: '1rem 0' }}
+                      custom={index}
+                      variants={itemVariants}
+                      initial="closed"
+                      animate="open"
+                      exit="closed"
+                    >
+                      <Link
+                        href={item.href}
+                        style={{
+                          fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+                          fontWeight: 'bold',
+                          color: 'white',
+                          textDecoration: 'none',
+                          display: 'inline-block',
+                          transition: 'transform 0.3s, color 0.3s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateX(8px)';
+                          e.currentTarget.style.color = '#e5e7eb';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateX(0)';
+                          e.currentTarget.style.color = 'white';
+                        }}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.li>
+                  ))}
+
+                  {/* Tools Dropdown */}
                   <motion.li
-                    key={item.id}
                     style={{ margin: '1rem 0' }}
-                    custom={index}
+                    custom={navItems.length}
                     variants={itemVariants}
                     initial="closed"
                     animate="open"
                     exit="closed"
                   >
-                    <Link
-                      href={item.href}
-                      style={{
-                        fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-                        fontWeight: 'bold',
-                        color: 'white',
-                        textDecoration: 'none',
-                        display: 'inline-block',
-                        transition: 'transform 0.3s, color 0.3s'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateX(8px)';
-                        e.currentTarget.style.color = '#e5e7eb';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateX(0)';
-                        e.currentTarget.style.color = 'white';
-                      }}
-                      onClick={() => setIsMenuOpen(false)}
+                    <div
+                      className="tools-button"
+                      onClick={() => setIsToolsOpen(!isToolsOpen)}
                     >
-                      {item.name}
-                    </Link>
+                      Tools
+                      <span className={`tools-indicator ${isToolsOpen ? 'open' : ''}`}>
+                        ▼
+                      </span>
+                    </div>
+
+                    <AnimatePresence>
+                      {isToolsOpen && (
+                        <motion.div
+                          className="tools-submenu"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="tools-grid">
+                            {calculatorTools.map((tool, idx) => (
+                              <Link
+                                key={tool.href}
+                                href={tool.href}
+                                className="submenu-item"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                <span className="submenu-icon">{tool.icon}</span>
+                                <span className="submenu-item-text">{tool.name}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.li>
-                ))}
-
-                {/* Tools Dropdown */}
-                <motion.li
-                  style={{ margin: '1rem 0' }}
-                  custom={navItems.length}
-                  variants={itemVariants}
-                  initial="closed"
-                  animate="open"
-                  exit="closed"
-                >
-                  <div
-                    className="tools-button"
-                    onClick={() => setIsToolsOpen(!isToolsOpen)}
-                  >
-                    Tools
-                    <span className={`tools-indicator ${isToolsOpen ? 'open' : ''}`}>
-                      ▼
-                    </span>
-                  </div>
-
-                  <AnimatePresence>
-                    {isToolsOpen && (
-                      <motion.div
-                        className="tools-submenu"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {calculatorTools.map((tool, idx) => (
-                          <motion.div
-                            key={tool.href}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                          >
-                            <Link
-                              href={tool.href}
-                              className="submenu-item"
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              <span className="submenu-icon">{tool.icon}</span>
-                              {tool.name}
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.li>
-
-                <motion.li
-                  style={{ marginTop: '2rem' }}
-                  custom={navItems.length + 1}
-                  variants={itemVariants}
-                  initial="closed"
-                  animate="open"
-                  exit="closed"
-                >
-                  <Link
-                    href="/contact"
-                    style={{
-                      display: 'inline-block',
-                      padding: '1rem 2.5rem',
-                      fontSize: '1.25rem',
-                      fontWeight: '600',
-                      color: 'black',
-                      background: 'white',
-                      borderRadius: '9999px',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#f3f4f6';
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'white';
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Get started
-                  </Link>
-                </motion.li>
-              </ul>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </ul>
+              </div>
+            </motion.div>
+          )
+        }
+      </AnimatePresence >
     </>
   );
 };

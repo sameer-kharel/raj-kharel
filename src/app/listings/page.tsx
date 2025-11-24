@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { ArrowUpIcon } from 'lucide-react';
+import Link from 'next/link';
 
 interface Listing {
   _id: string;
@@ -77,14 +77,14 @@ export default function ListingsPage() {
 
         .featured-card {
           display: grid;
-          grid-template-columns: 1.4fr 1fr;
-          gap: 24px;
-          margin-bottom: 40px;
+          grid-template-columns: 1.3fr 1fr;
+          gap: 28px;
+          margin-bottom: 48px;
         }
 
         .featured-image-card {
           background: white;
-          border-radius: 24px;
+          border-radius: 20px;
           overflow: hidden;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -99,7 +99,7 @@ export default function ListingsPage() {
 
         .featured-image-container {
           position: relative;
-          height: 450px;
+          height: 400px;
           overflow: hidden;
         }
 
@@ -116,8 +116,8 @@ export default function ListingsPage() {
 
         .featured-info-card {
           background: white;
-          border-radius: 24px;
-          padding: 32px;
+          border-radius: 20px;
+          padding: 28px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
           display: flex;
           flex-direction: column;
@@ -260,30 +260,28 @@ export default function ListingsPage() {
           box-shadow: 0 8px 20px rgba(30, 41, 59, 0.3);
         }
 
-        .request-tour-btn {
+        .contact-property-btn {
           width: 100%;
-          padding: 16px;
-          background: #1e293b;
+          padding: 14px;
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
           color: white;
           border: none;
-          border-radius: 16px;
-          font-size: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          border-radius: 12px;
+          font-size: 14px;
           font-weight: 700;
           cursor: pointer;
-          transition: all 0.3s;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          text-decoration: none;
+          box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
         }
 
-        .request-tour-btn:hover {
-          background: #334155;
+        .contact-property-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(30, 41, 59, 0.3);
-        }
-
-        .request-tour-subtitle {
-          font-size: 12px;
-          opacity: 0.8;
-          font-weight: 400;
-          margin-top: 4px;
+          box-shadow: 0 10px 24px rgba(59, 130, 246, 0.4);
         }
 
         .bookmark-btn {
@@ -615,13 +613,12 @@ export default function ListingsPage() {
 
               </div>
 
-              <button className="request-tour-btn2">
-                <ArrowUpIcon /> Visit
-              </button>
-
-              <button className="request-tour-btn">
-                Request a tour
-              </button>
+              <Link href="/contact" className="contact-property-btn">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
+                </svg>
+                Schedule a Tour
+              </Link>
             </motion.div>
           </div>
         )}
