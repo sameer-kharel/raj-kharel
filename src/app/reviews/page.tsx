@@ -229,7 +229,7 @@ export default function ReviewsPage() {
 
         @media (max-width: 768px) {
           .section-title {
-            font-size: 36px;
+            font-size: 28px;
           }
 
           .reviews-grid {
