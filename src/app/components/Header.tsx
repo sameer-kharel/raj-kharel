@@ -515,50 +515,7 @@ const Header = () => {
                     </motion.li>
                   ))}
 
-                  {/* Tools Dropdown */}
-                  <motion.li
-                    style={{ margin: '1rem 0' }}
-                    custom={navItems.length}
-                    variants={itemVariants}
-                    initial="closed"
-                    animate="open"
-                    exit="closed"
-                  >
-                    <div
-                      className="tools-button"
-                      onClick={() => setIsToolsOpen(!isToolsOpen)}
-                    >
-                      Tools
-                      <span className={`tools-indicator ${isToolsOpen ? 'open' : ''}`}>
-                        ▼
-                      </span>
-                    </div>
 
-                    <AnimatePresence>
-                      {isToolsOpen && (
-                        <motion.div
-                          className="tools-submenu"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <div className="tools-grid">
-                            {calculatorTools.map((tool, idx) => (
-                              <Link
-                                key={tool.href}
-                                href={tool.href}
-                                className="submenu-item"
-                                onClick={() => setIsMenuOpen(false)}
-                              >
-                                <span className="submenu-item-text">{tool.name}</span>
-                              </Link>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.li>
                 </ul>
               </div>
             </motion.div>

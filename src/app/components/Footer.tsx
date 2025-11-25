@@ -199,10 +199,10 @@ const Footer = () => {
               <h4 className="footer-column-title">Quick Links</h4>
               <ul className="footer-list">
                 <li><Link href="/" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Home</Link></li>
-                <li><Link href="/#about" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>About</Link></li>
-                <li><Link href="/#properties" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Properties</Link></li>
+                <li><Link href="/about" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>About</Link></li>
+                <li><Link href="/properties" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Properties</Link></li>
                 <li><Link href="/listings" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Listings</Link></li>
-                <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Contact</Link></li>
+                <li><Link href="/contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Contact</Link></li>
               </ul>
             </div>
 
@@ -210,9 +210,9 @@ const Footer = () => {
               <h4 className="footer-column-title">Services</h4>
               <ul className="footer-list">
                 <li><Link href="/listings" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Buy a Home</Link></li>
-                <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Sell a Home</Link></li>
-                <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Market Analysis</Link></li>
-                <li><Link href="/#contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Consultation</Link></li>
+                <li><Link href="/contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Sell a Home</Link></li>
+                <li><Link href="/contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Market Analysis</Link></li>
+                <li><Link href="/contact" className="footer-link" style={{ fontSize: '14px', fontWeight: '500' }}>Consultation</Link></li>
               </ul>
             </div>
 
