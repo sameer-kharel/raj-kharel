@@ -115,6 +115,7 @@ export default function SavingsGoalCalculator() {
                             <p className="result-label">Time to Reach Goal</p>
                             <p className="result-value">{result.months} months</p>
                             <p className="result-note">({result.years} years)</p>
+                            <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic' }}>* This is a rough estimate</p>
                         </div>
                     )}
                 </div>

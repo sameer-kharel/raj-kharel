@@ -27,17 +27,17 @@ const Header = () => {
   ];
 
   const calculatorTools = [
-    { name: 'Mortgage Calculator', href: '/calculators/mortgage', icon: '🏠' },
-    { name: 'Refinance Calculator', href: '/calculators/refinance', icon: '💰' },
-    { name: 'Loan Payment Calculator', href: '/calculators/loan-payment', icon: '💳' },
-    { name: 'APR Calculator', href: '/calculators/apr-calculator', icon: '📊' },
-    { name: 'Compound Interest', href: '/calculators/compound-interest', icon: '📈' },
-    { name: 'Credit Card Payoff', href: '/calculators/credit-card-payoff', icon: '💳' },
-    { name: 'Credit Utilization', href: '/calculators/credit-utilization', icon: '📉' },
-    { name: 'Debt Consolidation', href: '/calculators/debt-consolidation', icon: '🔄' },
-    { name: 'Income Tax Calculator', href: '/calculators/income-tax', icon: '💵' },
-    { name: 'Sales Tax Calculator', href: '/calculators/sales-tax', icon: '🧾' },
-    { name: 'Savings Goal Calculator', href: '/calculators/savings-goal', icon: '🎯' },
+    { name: 'Mortgage Calculator', href: '/calculators/mortgage' },
+    { name: 'Refinance Calculator', href: '/calculators/refinance' },
+    { name: 'Loan Payment Calculator', href: '/calculators/loan-payment' },
+    { name: 'APR Calculator', href: '/calculators/apr-calculator' },
+    { name: 'Compound Interest', href: '/calculators/compound-interest' },
+    { name: 'Credit Card Payoff', href: '/calculators/credit-card-payoff' },
+    { name: 'Credit Utilization', href: '/calculators/credit-utilization' },
+    { name: 'Debt Consolidation', href: '/calculators/debt-consolidation' },
+    { name: 'Income Tax Calculator', href: '/calculators/income-tax' },
+    { name: 'Sales Tax Calculator', href: '/calculators/sales-tax' },
+    { name: 'Savings Goal Calculator', href: '/calculators/savings-goal' },
   ];
 
   const menuVariants = {
@@ -386,7 +386,6 @@ const Header = () => {
                         e.currentTarget.style.transform = 'translateX(0)';
                       }}
                     >
-                      <span style={{ fontSize: '1.25rem' }}>{tool.icon}</span>
                       <span>{tool.name}</span>
                     </Link>
                   ))}
@@ -552,7 +551,6 @@ const Header = () => {
                                 className="submenu-item"
                                 onClick={() => setIsMenuOpen(false)}
                               >
-                                <span className="submenu-icon">{tool.icon}</span>
                                 <span className="submenu-item-text">{tool.name}</span>
                               </Link>
                             ))}

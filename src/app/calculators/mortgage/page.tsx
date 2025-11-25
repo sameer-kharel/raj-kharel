@@ -379,6 +379,7 @@ export default function MortgageCalculator() {
                             <p className="result-label">Estimated Monthly Payment</p>
                             <p className="result-value">{monthlyPayment}</p>
                             <p className="result-note">Including principal, interest, taxes, and insurance</p>
+                            <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic' }}>* This is a rough estimate</p>
                         </div>
                     )}
                 </div>

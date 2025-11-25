@@ -77,6 +77,7 @@ export default function CreditUtilizationCalculator() {
                             <p className="result-label">Credit Utilization</p>
                             <p className="result-value">{utilization}</p>
                             <p className="result-note">{getUtilizationMessage()}</p>
+                            <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic' }}>* This is a rough estimate</p>
                         </div>
                     )}
                 </div>

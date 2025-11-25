@@ -83,6 +83,7 @@ export default function LoanPaymentCalculator() {
                         <div className="result-card">
                             <p className="result-label">Monthly Payment</p>
                             <p className="result-value">{monthlyPayment}</p>
+                            <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic' }}>* This is a rough estimate</p>
                         </div>
                     )}
                 </div>

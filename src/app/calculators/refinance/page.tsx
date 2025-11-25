@@ -122,6 +122,7 @@ export default function RefinanceCalculator() {
                                 <p className="result-item-label">Monthly Savings</p>
                                 <p className="result-item-value">{result.savings}</p>
                             </div>
+                            <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic', gridColumn: '1 / -1', textAlign: 'center' }}>* This is a rough estimate</p>
                         </div>
                     )}
                 </div>

@@ -631,7 +631,6 @@ export default function ListingsPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="filter-item">
-            <span className="filter-icon">📍</span>
             <div>
               <span className="filter-label">Location</span>
               <div className="filter-value">{location}</div>
@@ -639,7 +638,6 @@ export default function ListingsPage() {
           </div>
 
           <div className="filter-item">
-            <span className="filter-icon">🏢</span>
             <div>
               <span className="filter-label">Property type</span>
               <div className="filter-value">{propertyType}</div>
@@ -647,7 +645,6 @@ export default function ListingsPage() {
           </div>
 
           <div className="filter-item">
-            <span className="filter-icon">💰</span>
             <div>
               <span className="filter-label">Price</span>
               <div className="filter-value">{priceRange}</div>
@@ -655,21 +652,13 @@ export default function ListingsPage() {
           </div>
 
           <div className="filter-item">
-            <span className="filter-icon">🛏️</span>
             <div>
               <span className="filter-label">Bedrooms</span>
               <div className="filter-value">{bedrooms}</div>
             </div>
           </div>
 
-          <div className="filter-item">
-            <span className="filter-icon">⚙️</span>
-            <div>
-              <span className="filter-value">More</span>
-            </div>
-          </div>
 
-          <button className="search-btn">Search</button>
         </motion.div>
 
         {/* Latest Listings Section */}

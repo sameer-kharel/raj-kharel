@@ -102,10 +102,12 @@ export default function CreditCardPayoffCalculator() {
                                     <p className="result-item-value">{result.interest}</p>
                                 </div>
                             </div>
-                        </>
+                            <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic', textAlign: 'center', width: '100%' }}>* This is a rough estimate</p>
+                        </div>
+                </>
                     )}
-                </div>
             </div>
         </div>
+        </div >
     );
 }

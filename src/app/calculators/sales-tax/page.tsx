@@ -78,6 +78,7 @@ export default function SalesTaxCalculator() {
                             <div className="result-card">
                                 <p className="result-label">Total Price</p>
                                 <p className="result-value">{result.total}</p>
+                                <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic' }}>* This is a rough estimate</p>
                             </div>
                         </div>
                     )}

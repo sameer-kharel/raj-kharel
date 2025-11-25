@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import Image from 'next/image';
+import { Home, Star, Users, Trophy } from 'lucide-react';
 
 const About = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,10 +45,10 @@ const About = () => {
   };
 
   const stats = [
-    { icon: '🏠', value: '50+', label: 'Properties Sold', color: '#3b82f6' },
-    { icon: '⭐', value: '5/5', label: 'Client Rating', color: '#f59e0b' },
-    { icon: '👥', value: '50+', label: 'Happy Clients', color: '#10b981' },
-    { icon: '🏆', value: '2+', label: 'Years Experience', color: '#8b5cf6' },
+    { icon: <Home size={32} />, value: '50+', label: 'Properties Sold', color: '#3b82f6' },
+    { icon: <Star size={32} />, value: '5/5', label: 'Client Rating', color: '#f59e0b' },
+    { icon: <Users size={32} />, value: '50+', label: 'Happy Clients', color: '#10b981' },
+    { icon: <Trophy size={32} />, value: '2+', label: 'Years Experience', color: '#8b5cf6' },
   ];
 
   return (
@@ -242,11 +243,11 @@ const About = () => {
         }
 
         .stat-icon {
-          font-size: 56px;
           margin-bottom: 20px;
           display: inline-block;
           filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
           transition: transform 0.4s;
+          color: var(--card-color);
         }
 
         .stat-card:hover .stat-icon {
