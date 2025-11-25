@@ -39,7 +39,7 @@ export default function MortgageCalculator() {
 
     return (
         <div className="calculator-page">
-            <style>{`
+            <style jsx>{`
                 .calculator-page {
                     min-height: 100vh;
                     background: #ffffff;
@@ -76,9 +76,9 @@ export default function MortgageCalculator() {
                 .calculator-card {
                     background: white;
                     border: 1px solid #e5e7eb;
-                    border-radius: 12px;
+                    border-radius: 16px;
                     padding: 40px;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
                 }
 
                 .calculator-header {
@@ -89,8 +89,20 @@ export default function MortgageCalculator() {
                 }
 
                 .calculator-icon {
-                    font-size: 48px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 64px;
+                    height: 64px;
+                    background: #eff6ff;
+                    border-radius: 50%;
+                    color: #3b82f6;
                     margin-bottom: 16px;
+                }
+
+                .calculator-icon svg {
+                    width: 32px;
+                    height: 32px;
                 }
 
                 .calculator-title {
@@ -98,6 +110,7 @@ export default function MortgageCalculator() {
                     font-weight: 700;
                     color: #1f2937;
                     margin: 0 0 8px 0;
+                    letter-spacing: -0.5px;
                 }
 
                 .calculator-subtitle {
@@ -109,8 +122,8 @@ export default function MortgageCalculator() {
                 .form-grid {
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
-                    gap: 20px;
-                    margin-bottom: 24px;
+                    gap: 24px;
+                    margin-bottom: 32px;
                 }
 
                 .form-group {
@@ -123,123 +136,158 @@ export default function MortgageCalculator() {
                     font-size: 14px;
                     font-weight: 600;
                     color: #374151;
+                    margin-bottom: 4px;
                 }
 
                 .required {
                     color: #ef4444;
+                    margin-left: 4px;
                 }
 
                 .input-wrapper {
                     position: relative;
+                    display: flex;
+                    align-items: center;
                 }
 
                 .input-prefix,
                 .input-suffix {
                     position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    color: #9ca3af;
+                    color: #6b7280;
                     font-weight: 500;
                     font-size: 14px;
+                    pointer-events: none;
                 }
 
                 .input-prefix {
-                    left: 12px;
+                    left: 16px;
                 }
 
                 .input-suffix {
-                    right: 12px;
+                    right: 16px;
                 }
 
                 .form-input {
                     width: 100%;
-                    padding: 12px;
+                    padding: 12px 16px;
                     border: 1px solid #d1d5db;
-                    border-radius: 6px;
-                    font-size: 15px;
-                    background: #f9fafb;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    background: #ffffff;
                     transition: all 0.2s ease;
                     outline: none;
                     color: #1f2937;
+                    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
                 }
 
                 .form-input:hover {
-                    background: white;
                     border-color: #9ca3af;
                 }
 
                 .form-input:focus {
-                    background: white;
                     border-color: #3b82f6;
-                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
                 }
 
                 .form-input.has-prefix {
-                    padding-left: 32px;
+                    padding-left: 36px;
                 }
 
                 .form-input.has-suffix {
-                    padding-right: 60px;
+                    padding-right: 48px;
                 }
 
                 .form-input::placeholder {
                     color: #9ca3af;
-                    font-size: 14px;
                 }
 
                 .calculate-button {
                     width: 100%;
-                    padding: 14px;
+                    padding: 16px;
                     background: #3b82f6;
                     color: white;
                     font-size: 16px;
                     font-weight: 600;
                     border: none;
-                    border-radius: 6px;
+                    border-radius: 8px;
                     cursor: pointer;
                     transition: all 0.2s ease;
+                    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
                 }
 
                 .calculate-button:hover {
                     background: #2563eb;
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.6);
                 }
 
                 .calculate-button:active {
-                    transform: scale(0.98);
+                    transform: translateY(0);
                 }
 
                 .result-card {
-                    margin-top: 24px;
-                    padding: 24px;
-                    background: #eff6ff;
-                    border: 1px solid #bfdbfe;
-                    border-radius: 8px;
+                    margin-top: 32px;
+                    padding: 32px;
+                    background: #f0f9ff;
+                    border: 1px solid #bae6fd;
+                    border-radius: 16px;
                     text-align: center;
+                    animation: fadeIn 0.5s ease-out;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
 
                 .result-label {
-                    color: #1e40af;
-                    font-size: 13px;
+                    color: #0369a1;
+                    font-size: 14px;
                     font-weight: 600;
                     text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    margin-bottom: 8px;
+                    letter-spacing: 1px;
+                    margin-bottom: 12px;
                 }
 
                 .result-value {
-                    color: #1e3a8a;
-                    font-size: 36px;
-                    font-weight: 700;
+                    color: #0c4a6e;
+                    font-size: 48px;
+                    font-weight: 800;
                     margin: 0;
+                    line-height: 1;
+                    letter-spacing: -1px;
                 }
 
                 .result-note {
-                    color: #3b82f6;
+                    color: #0284c7;
+                    font-size: 14px;
+                    margin-top: 12px;
+                }
+
+                .result-warning {
+                    margin-top: 20px;
+                    padding: 12px;
+                    background: #fef2f2;
+                    border: 1px solid #fecaca;
+                    border-radius: 8px;
+                    color: #991b1b;
                     font-size: 13px;
-                    margin-top: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                }
+
+                .warning-icon {
+                    width: 16px;
+                    height: 16px;
                 }
 
                 @media (max-width: 768px) {
+                    .calculator-page {
+                        padding: 20px 16px;
+                    }
+
                     .calculator-card {
                         padding: 24px;
                     }
@@ -250,10 +298,28 @@ export default function MortgageCalculator() {
 
                     .form-grid {
                         grid-template-columns: 1fr;
+                        gap: 20px;
                     }
 
                     .result-value {
-                        font-size: 32px;
+                        font-size: 36px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .calculator-card {
+                        padding: 20px;
+                        border-radius: 12px;
+                    }
+
+                    .calculator-icon {
+                        width: 48px;
+                        height: 48px;
+                    }
+
+                    .calculator-icon svg {
+                        width: 24px;
+                        height: 24px;
                     }
                 }
             `}</style>
@@ -270,7 +336,11 @@ export default function MortgageCalculator() {
                     <CalculatorNavigation currentPath="/calculators/mortgage" />
 
                     <div className="calculator-header">
-                        <div className="calculator-icon">🏠</div>
+                        <div className="calculator-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                        </div>
                         <h1 className="calculator-title">Mortgage Calculator</h1>
                         <p className="calculator-subtitle">Calculate your estimated monthly mortgage payment</p>
                     </div>
@@ -379,7 +449,12 @@ export default function MortgageCalculator() {
                             <p className="result-label">Estimated Monthly Payment</p>
                             <p className="result-value">{monthlyPayment}</p>
                             <p className="result-note">Including principal, interest, taxes, and insurance</p>
-                            <p className="result-warning" style={{ fontSize: '12px', color: '#ef4444', marginTop: '12px', fontStyle: 'italic' }}>* This is a rough estimate</p>
+                            <div className="result-warning">
+                                <svg className="warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>This is a rough estimate and does not include all potential costs.</span>
+                            </div>
                         </div>
                     )}
                 </div>
