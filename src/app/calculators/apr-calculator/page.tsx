@@ -68,7 +68,6 @@ export default function APRCalculator() {
 
                 .calculator-card {
                     background: white;
-                    border: 1px solid #e5e7eb;
                     border-radius: 16px;
                     padding: 40px;
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);

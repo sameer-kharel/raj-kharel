@@ -321,7 +321,7 @@ const Header = () => {
               onMouseEnter={() => setIsToolsOpen(true)}
               onMouseLeave={() => setIsToolsOpen(false)}
             >
-              <button
+              <motion.button
                 style={{
                   background: 'white',
                   borderRadius: '9999px',
@@ -332,65 +332,111 @@ const Header = () => {
                   fontSize: '0.95rem',
                   fontWeight: '600',
                   color: '#111827',
-                  transition: 'all 0.3s',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)'
+                }}
+                whileTap={{ scale: 0.95 }}
               >
                 Tools
-                <span style={{ fontSize: '0.75rem' }}>▼</span>
-              </button>
+                <motion.span
+                  style={{ fontSize: '0.75rem' }}
+                  animate={{ rotate: isToolsOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  ▼
+                </motion.span>
+              </motion.button>
 
               {/* Tools Dropdown Menu */}
-              {isToolsOpen && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '0.5rem',
-                  background: 'white',
-                  borderRadius: '1rem',
-                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                  padding: '1rem',
-                  minWidth: '800px',
-                  zIndex: 1000,
-                  border: '1px solid rgba(0, 0, 0, 0.05)',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '0.75rem'
-                }}>
-                  {calculatorTools.map((tool) => (
-                    <Link
-                      key={tool.href}
-                      href={tool.href}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        padding: '0.875rem 1rem',
-                        borderRadius: '0.75rem',
-                        textDecoration: 'none',
-                        color: '#1f2937',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        transition: 'all 0.2s',
-                        background: 'transparent'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#f3f4f6';
-                        e.currentTarget.style.transform = 'translateX(4px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.transform = 'translateX(0)';
-                      }}
-                    >
-                      <span>{tool.name}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
+              <AnimatePresence>
+                {isToolsOpen && (
+                  <motion.div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: '0.5rem',
+                      background: 'white',
+                      borderRadius: '1rem',
+                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                      padding: '1rem',
+                      minWidth: '800px',
+                      maxWidth: '900px',
+                      zIndex: 1000,
+                      border: '1px solid rgba(0, 0, 0, 0.05)',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '0.75rem',
+                      overflow: 'hidden'
+                    }}
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                  >
+                    {calculatorTools.map((tool, index) => (
+                      <motion.div
+                        key={tool.href}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.03,
+                          ease: 'easeOut'
+                        }}
+                      >
+                        <Link
+                          href={tool.href}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.875rem 1rem',
+                            borderRadius: '0.75rem',
+                            textDecoration: 'none',
+                            color: '#1f2937',
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            transition: 'all 0.2s',
+                            background: 'transparent',
+                            position: 'relative',
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)';
+                            e.currentTarget.style.transform = 'translateX(4px)';
+                            e.currentTarget.style.color = '#2563eb';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.transform = 'translateX(0)';
+                            e.currentTarget.style.color = '#1f2937';
+                          }}
+                        >
+                          <motion.span
+                            style={{
+                              fontSize: '1.25rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            whileHover={{ scale: 1.2, rotate: 5 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            📊
+                          </motion.span>
+                          <span>{tool.name}</span>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
