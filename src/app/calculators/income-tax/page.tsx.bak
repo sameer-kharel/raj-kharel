@@ -4,42 +4,46 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import CalculatorNavigation from '../../components/CalculatorNavigation';
 
-export default function DebtConsolidationCalculator() {
-    const [debt1, setDebt1] = useState('');
-    const [rate1, setRate1] = useState('');
-    const [debt2, setDebt2] = useState('');
-    const [rate2, setRate2] = useState('');
-    const [consolidationRate, setConsolidationRate] = useState('');
-    const [term, setTerm] = useState('');
-    const [result, setResult] = useState<{ current: string, consolidated: string, savings: string } | null>(null);
+export default function IncomeTaxCalculator() {
+    const [income, setIncome] = useState('');
+    const [deductions, setDeductions] = useState('');
+    const [result, setResult] = useState<{ taxable: string, tax: string, effective: string } | null>(null);
     const [showResult, setShowResult] = useState(false);
 
-    const calculateConsolidation = () => {
-        const d1 = parseFloat(debt1 || '0');
-        const r1 = parseFloat(rate1 || '0') / 100 / 12;
-        const d2 = parseFloat(debt2 || '0');
-        const r2 = parseFloat(rate2 || '0') / 100 / 12;
-        const totalDebt = d1 + d2;
-        const consRate = parseFloat(consolidationRate) / 100 / 12;
-        const n = parseFloat(term) * 12;
+    const calculateTax = () => {
+        const grossIncome = parseFloat(income);
+        const totalDeductions = parseFloat(deductions || '0');
 
-        if (totalDebt <= 0 || isNaN(consRate) || isNaN(n) || n <= 0) {
-            alert('Please enter valid numbers.');
+        if (isNaN(grossIncome) || grossIncome <= 0) {
+            alert('Please enter a valid income.');
             return;
         }
 
-        const currentN = 60;
-        const payment1 = d1 > 0 ? d1 * (r1 * Math.pow(1 + r1, currentN)) / (Math.pow(1 + r1, currentN) - 1) : 0;
-        const payment2 = d2 > 0 ? d2 * (r2 * Math.pow(1 + r2, currentN)) / (Math.pow(1 + r2, currentN) - 1) : 0;
-        const currentPayment = payment1 + payment2;
+        const taxableIncome = Math.max(0, grossIncome - totalDeductions);
 
-        const consolidatedPayment = totalDebt * (consRate * Math.pow(1 + consRate, n)) / (Math.pow(1 + consRate, n) - 1);
-        const savings = currentPayment - consolidatedPayment;
+        let tax = 0;
+        if (taxableIncome <= 11000) {
+            tax = taxableIncome * 0.10;
+        } else if (taxableIncome <= 44725) {
+            tax = 1100 + (taxableIncome - 11000) * 0.12;
+        } else if (taxableIncome <= 95375) {
+            tax = 5147 + (taxableIncome - 44725) * 0.22;
+        } else if (taxableIncome <= 182100) {
+            tax = 16290 + (taxableIncome - 95375) * 0.24;
+        } else if (taxableIncome <= 231250) {
+            tax = 37104 + (taxableIncome - 182100) * 0.32;
+        } else if (taxableIncome <= 578125) {
+            tax = 52832 + (taxableIncome - 231250) * 0.35;
+        } else {
+            tax = 174238.25 + (taxableIncome - 578125) * 0.37;
+        }
+
+        const effectiveRate = (tax / grossIncome) * 100;
 
         setResult({
-            current: `$${currentPayment.toFixed(2)}`,
-            consolidated: `$${consolidatedPayment.toFixed(2)}`,
-            savings: `$${Math.abs(savings).toFixed(2)}`
+            taxable: `$${taxableIncome.toFixed(2)}`,
+            tax: `$${tax.toFixed(2)}`,
+            effective: `${effectiveRate.toFixed(2)}%`
         });
         setShowResult(true);
     };
@@ -124,15 +128,6 @@ export default function DebtConsolidationCalculator() {
                     color: #6b7280;
                     font-size: 15px;
                     margin: 0;
-                }
-
-                .section-title {
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: #374151;
-                    margin-bottom: 16px;
-                    padding-bottom: 8px;
-                    border-bottom: 1px solid #e5e7eb;
                 }
 
                 .form-grid {
@@ -320,32 +315,6 @@ export default function DebtConsolidationCalculator() {
                     }
                 }
 
-
-                @media (max-width: 640px) {
-                    .form-grid {
-                        grid-template-columns: 1fr;
-                        gap: 18px;
-                    }
-
-                    .form-input, .form-select {
-                        font-size: 16px;
-                        padding: 14px 18px;
-                    }
-
-                    .form-input.has-prefix {
-                        padding-left: 38px;
-                    }
-
-                    .form-input.has-suffix {
-                        padding-right: 50px;
-                    }
-
-                    .calculate-button {
-                        padding: 18px;
-                        font-size: 15px;
-                    }
-                }
-
                 @media (max-width: 480px) {
                     .calculator-card {
                         padding: 20px;
@@ -361,18 +330,6 @@ export default function DebtConsolidationCalculator() {
                         width: 24px;
                         height: 24px;
                     }
-
-                    .result-value {
-                        font-size: 32px;
-                    }
-
-                    .result-item-value {
-                        font-size: 20px;
-                    }
-
-                    .calculator-page {
-                        padding: 20px 12px;
-                    }
                 }
             `}</style>
 
@@ -385,88 +342,52 @@ export default function DebtConsolidationCalculator() {
                 </Link>
 
                 <div className="calculator-card">
-                    <CalculatorNavigation currentPath="/calculators/debt-consolidation" />
+                    <CalculatorNavigation currentPath="/calculators/income-tax" />
 
                     <div className="calculator-header">
                         <div className="calculator-icon">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h1 className="calculator-title">Debt Consolidation</h1>
-                        <p className="calculator-subtitle">Compare current debts with a consolidated loan</p>
+                        <h1 className="calculator-title">Income Tax Calculator</h1>
+                        <p className="calculator-subtitle">Estimate your federal income tax (2024 rates)</p>
                     </div>
 
-                    <div>
-                        <h3 className="section-title">Current Debts</h3>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">Debt 1 Amount</label>
-                                <div className="input-wrapper">
-                                    <span className="input-prefix">$</span>
-                                    <input type="number" className="form-input has-prefix" placeholder="5,000" value={debt1} onChange={(e) => setDebt1(e.target.value)} />
-                                </div>
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label className="form-label">Gross Annual Income <span className="required">*</span></label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="75,000" value={income} onChange={(e) => setIncome(e.target.value)} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Rate 1</label>
-                                <div className="input-wrapper">
-                                    <input type="number" step="0.01" className="form-input has-suffix" placeholder="18" value={rate1} onChange={(e) => setRate1(e.target.value)} />
-                                    <span className="input-suffix">%</span>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Debt 2 Amount</label>
-                                <div className="input-wrapper">
-                                    <span className="input-prefix">$</span>
-                                    <input type="number" className="form-input has-prefix" placeholder="3,000" value={debt2} onChange={(e) => setDebt2(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Rate 2</label>
-                                <div className="input-wrapper">
-                                    <input type="number" step="0.01" className="form-input has-suffix" placeholder="15" value={rate2} onChange={(e) => setRate2(e.target.value)} />
-                                    <span className="input-suffix">%</span>
-                                </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Total Deductions</label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="13,850" value={deductions} onChange={(e) => setDeductions(e.target.value)} />
                             </div>
                         </div>
                     </div>
 
-                    <div>
-                        <h3 className="section-title">Consolidated Loan</h3>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">Consolidation Rate <span className="required">*</span></label>
-                                <div className="input-wrapper">
-                                    <input type="number" step="0.01" className="form-input has-suffix" placeholder="8" value={consolidationRate} onChange={(e) => setConsolidationRate(e.target.value)} />
-                                    <span className="input-suffix">%</span>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Loan Term <span className="required">*</span></label>
-                                <div className="input-wrapper">
-                                    <input type="number" className="form-input has-suffix" placeholder="5" value={term} onChange={(e) => setTerm(e.target.value)} />
-                                    <span className="input-suffix">years</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button onClick={calculateConsolidation} className="calculate-button">Compare Options</button>
+                    <button onClick={calculateTax} className="calculate-button">Calculate Tax</button>
 
                     {showResult && result && (
                         <div className="result-card">
                             <div className="result-grid-3">
                                 <div className="result-item">
-                                    <p className="result-item-label">Current Payment</p>
-                                    <p className="result-item-value">{result.current}</p>
+                                    <p className="result-item-label">Taxable Income</p>
+                                    <p className="result-item-value">{result.taxable}</p>
                                 </div>
                                 <div className="result-item">
-                                    <p className="result-item-label">Consolidated Payment</p>
-                                    <p className="result-item-value">{result.consolidated}</p>
+                                    <p className="result-item-label">Estimated Tax</p>
+                                    <p className="result-item-value">{result.tax}</p>
                                 </div>
                                 <div className="result-item">
-                                    <p className="result-item-label">Monthly Savings</p>
-                                    <p className="result-item-value">{result.savings}</p>
+                                    <p className="result-item-label">Effective Rate</p>
+                                    <p className="result-item-value">{result.effective}</p>
                                 </div>
                             </div>
                             <div className="result-warning">

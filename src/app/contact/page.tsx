@@ -4,100 +4,100 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Contact = () => {
-    const [activeTab, setActiveTab] = useState<'message' | 'meeting'>('message');
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        message: '',
-        preferredDate: '',
-        preferredTime: '',
+  const [activeTab, setActiveTab] = useState<'message' | 'meeting'>('message');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+    preferredDate: '',
+    preferredTime: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        setSubmitStatus('idle');
-
-        try {
-            const response = await fetch('/api/contact', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            if (response.ok) {
-                setSubmitStatus('success');
-                setFormData({ name: '', email: '', phone: '', message: '', preferredDate: '', preferredTime: '' });
-                setTimeout(() => setSubmitStatus('idle'), 5000);
-            } else {
-                setSubmitStatus('error');
-                setTimeout(() => setSubmitStatus('idle'), 5000);
-            }
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            setSubmitStatus('error');
-            setTimeout(() => setSubmitStatus('idle'), 5000);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2,
-            },
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-    };
+        body: JSON.stringify(formData),
+      });
 
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: {
-                duration: 0.5,
-                ease: [0.22, 1, 0.36, 1],
-            },
-        },
-    };
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', phone: '', message: '', preferredDate: '', preferredTime: '' });
+        setTimeout(() => setSubmitStatus('idle'), 5000);
+      } else {
+        setSubmitStatus('error');
+        setTimeout(() => setSubmitStatus('idle'), 5000);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus('idle'), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    const tabContentVariants = {
-        hidden: { opacity: 0, x: -20 },
-        visible: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: 20 },
-    };
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
 
-    // Get today's date for min attribute
-    const today = new Date().toISOString().split('T')[0];
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  };
 
-    return (
-        <section
-            id="contact"
-            style={{
-                position: 'relative',
-                background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f0f9ff 100%)',
-                color: '#1e293b',
-                padding: '120px 32px',
-                overflow: 'hidden',
-            }}
-        >
-            <style>{`
+  const tabContentVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 20 },
+  };
+
+  // Get today's date for min attribute
+  const today = new Date().toISOString().split('T')[0];
+
+  return (
+    <section
+      id="contact"
+      style={{
+        position: 'relative',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f0f9ff 100%)',
+        color: '#1e293b',
+        padding: '120px 32px',
+        overflow: 'hidden',
+      }}
+    >
+      <style>{`
         @keyframes slideIn {
           0% { transform: translateY(20px); opacity: 0; }
           100% { transform: translateY(0); opacity: 1; }
@@ -487,396 +487,444 @@ const Contact = () => {
 
           .tab-btn {
             font-size: 13px;
-            padding: 14px 16px;
+            padding: 16px 16px;
+            min-height: 48px;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .form-group-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+          }
+
+          .contact-form {
+            padding: 32px 24px;
+            border-radius: 24px;
+          }
+
+          .section-title {
+            font-size: 32px;
+          }
+
+          .form-input,
+          .form-textarea,
+          .form-select {
+            font-size: 16px;
+            padding: 16px 20px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .contact-form {
+            padding: 28px 20px;
+          }
+
+          .info-card {
+            padding: 28px 24px;
+          }
+
+          .tab-btn {
+            font-size: 12px;
+            padding: 14px 12px;
+          }
+
+          .form-title {
+            font-size: 24px;
+          }
+
+          .submit-btn {
+            padding: 18px 32px;
+            font-size: 16px;
           }
         }
       `}</style>
 
-            {/* Background Elements */}
-            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
-                <motion.div
-                    style={{
-                        position: 'absolute',
-                        top: '10%',
-                        right: '5%',
-                        width: '550px',
-                        height: '550px',
-                        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%)',
-                        borderRadius: '50%',
-                        filter: 'blur(100px)',
-                    }}
-                    animate={{
-                        opacity: [0.3, 0.5, 0.3],
-                        scale: [1, 1.2, 1],
-                        x: [0, 50, 0],
-                        y: [0, -30, 0],
-                    }}
-                    transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-                />
-                <motion.div
-                    style={{
-                        position: 'absolute',
-                        bottom: '10%',
-                        left: '5%',
-                        width: '500px',
-                        height: '500px',
-                        background: 'radial-gradient(circle, rgba(147, 197, 253, 0.06) 0%, transparent 70%)',
-                        borderRadius: '50%',
-                        filter: 'blur(90px)',
-                    }}
-                    animate={{
-                        opacity: [0.2, 0.4, 0.2],
-                        scale: [1, 1.25, 1],
-                        x: [0, -40, 0],
-                        y: [0, 40, 0],
-                    }}
-                    transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-                />
-            </div>
+      {/* Background Elements */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: '10%',
+            right: '5%',
+            width: '550px',
+            height: '550px',
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(100px)',
+          }}
+          animate={{
+            opacity: [0.3, 0.5, 0.3],
+            scale: [1, 1.2, 1],
+            x: [0, 50, 0],
+            y: [0, -30, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          style={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '5%',
+            width: '500px',
+            height: '500px',
+            background: 'radial-gradient(circle, rgba(147, 197, 253, 0.06) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(90px)',
+          }}
+          animate={{
+            opacity: [0.2, 0.4, 0.2],
+            scale: [1, 1.25, 1],
+            x: [0, -40, 0],
+            y: [0, 40, 0],
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+
+      <motion.div
+        className="contact-container"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={containerVariants}
+      >
+        {/* Section Header */}
+        <div className="section-header">
+          <motion.div
+            className="section-badge"
+            variants={itemVariants}
+          >
+            Get in Touch
+          </motion.div>
+          <motion.h2
+            className="section-title"
+            variants={itemVariants}
+          >
+            Let's Work Together
+          </motion.h2>
+          <motion.p
+            className="section-subtitle"
+            variants={itemVariants}
+          >
+            Ready to buy or sell your property? Send me a message or schedule a consultation.
+          </motion.p>
+        </div>
+
+        {/* Contact Grid */}
+        <div className="contact-grid">
+          {/* Contact Info */}
+          <motion.div
+            className="contact-info"
+            variants={itemVariants}
+          >
+            <motion.div
+              className="info-card"
+              whileHover={{ y: -6 }}
+            >
+              <div className="info-icon-wrapper">
+                <div className="info-icon">
+                  <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
+                </div>
+                <h3 className="info-title">Email</h3>
+              </div>
+              <p className="info-text">
+                <a href="mailto:kharelrealty@gmail.com" className="info-link">
+                  kharelrealty@gmail.com
+                </a>
+              </p>
+            </motion.div>
 
             <motion.div
-                className="contact-container"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-                variants={containerVariants}
+              className="info-card"
+              whileHover={{ y: -6 }}
             >
-                {/* Section Header */}
-                <div className="section-header">
-                    <motion.div
-                        className="section-badge"
-                        variants={itemVariants}
-                    >
-                        Get in Touch
-                    </motion.div>
-                    <motion.h2
-                        className="section-title"
-                        variants={itemVariants}
-                    >
-                        Let's Work Together
-                    </motion.h2>
-                    <motion.p
-                        className="section-subtitle"
-                        variants={itemVariants}
-                    >
-                        Ready to buy or sell your property? Send me a message or schedule a consultation.
-                    </motion.p>
+              <div className="info-icon-wrapper">
+                <div className="info-icon">
+                  <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
+                    <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
                 </div>
-
-                {/* Contact Grid */}
-                <div className="contact-grid">
-                    {/* Contact Info */}
-                    <motion.div
-                        className="contact-info"
-                        variants={itemVariants}
-                    >
-                        <motion.div
-                            className="info-card"
-                            whileHover={{ y: -6 }}
-                        >
-                            <div className="info-icon-wrapper">
-                                <div className="info-icon">
-                                    <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
-                                        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
-                                    </svg>
-                                </div>
-                                <h3 className="info-title">Email</h3>
-                            </div>
-                            <p className="info-text">
-                                <a href="mailto:kharelrealty@gmail.com" className="info-link">
-                                    kharelrealty@gmail.com
-                                </a>
-                            </p>
-                        </motion.div>
-
-                        <motion.div
-                            className="info-card"
-                            whileHover={{ y: -6 }}
-                        >
-                            <div className="info-icon-wrapper">
-                                <div className="info-icon">
-                                    <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
-                                        <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke="currentColor" strokeWidth="2" fill="none" />
-                                    </svg>
-                                </div>
-                                <h3 className="info-title">Phone</h3>
-                            </div>
-                            <p className="info-text">
-                                <a href="tel:+15712441254" className="info-link">
-                                    (571) 244-1254
-                                </a>
-                            </p>
-                        </motion.div>
-
-                        <motion.div
-                            className="info-card"
-                            whileHover={{ y: -6 }}
-                        >
-                            <div className="info-icon-wrapper">
-                                <div className="info-icon">
-                                    <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
-                                        <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="currentColor" strokeWidth="2" fill="none" />
-                                        <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" strokeWidth="2" fill="none" />
-                                    </svg>
-                                </div>
-                                <h3 className="info-title">Office</h3>
-                            </div>
-                            <p className="info-text">
-                                Fairfax, VA<br />
-                                DMV Realty, INC.
-                            </p>
-                        </motion.div>
-                    </motion.div>
-
-                    {/* Contact Form with Tabs */}
-                    <motion.div variants={itemVariants}>
-                        <form className="contact-form" onSubmit={handleSubmit}>
-                            {/* Tab Buttons */}
-                            <div className="tab-buttons">
-                                <button
-                                    type="button"
-                                    className={`tab-btn ${activeTab === 'message' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('message')}
-                                >
-                                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
-                                    </svg>
-                                    Send Message
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`tab-btn ${activeTab === 'meeting' ? 'active' : ''}`}
-                                    onClick={() => setActiveTab('meeting')}
-                                >
-                                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
-                                    </svg>
-                                    Schedule Meeting
-                                </button>
-                            </div>
-
-                            <AnimatePresence mode="wait">
-                                {activeTab === 'message' ? (
-                                    <motion.div
-                                        key="message"
-                                        variants={tabContentVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        exit="exit"
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <h3 className="form-title">Send Me a Message</h3>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="name">Your Name *</label>
-                                            <input
-                                                type="text"
-                                                id="name"
-                                                name="name"
-                                                className="form-input"
-                                                placeholder="kharel realty"
-                                                value={formData.name}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="email">Email Address *</label>
-                                            <input
-                                                type="email"
-                                                id="email"
-                                                name="email"
-                                                className="form-input"
-                                                placeholder="your@email.com"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="phone">Phone Number</label>
-                                            <input
-                                                type="tel"
-                                                id="phone"
-                                                name="phone"
-                                                className="form-input"
-                                                placeholder="(123) 123-4567"
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="message">Your Message *</label>
-                                            <textarea
-                                                id="message"
-                                                name="message"
-                                                className="form-textarea"
-                                                placeholder="Tell me about your real estate needs..."
-                                                value={formData.message}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </div>
-
-                                        <motion.button
-                                            type="submit"
-                                            className="submit-btn"
-                                            disabled={isSubmitting}
-                                            whileHover={{ scale: 1.01 }}
-                                            whileTap={{ scale: 0.99 }}
-                                        >
-                                            <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
-                                        </motion.button>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        key="meeting"
-                                        variants={tabContentVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        exit="exit"
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <h3 className="form-title">Schedule Your Consultation</h3>
-
-                                        <div className="schedule-notice">
-                                            <svg width="20" height="20" fill="#3b82f6" viewBox="0 0 24 24">
-                                                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" fill="none" />
-                                            </svg>
-                                            <p className="schedule-notice-text">
-                                                I'll review your request and send you a Google Calendar invite to confirm the meeting.
-                                            </p>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="name">Your Name *</label>
-                                            <input
-                                                type="text"
-                                                id="name"
-                                                name="name"
-                                                className="form-input"
-                                                placeholder="kharel realty"
-                                                value={formData.name}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="email">Email Address *</label>
-                                            <input
-                                                type="email"
-                                                id="email"
-                                                name="email"
-                                                className="form-input"
-                                                placeholder="your@email.com"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="phone">Phone Number</label>
-                                            <input
-                                                type="tel"
-                                                id="phone"
-                                                name="phone"
-                                                className="form-input"
-                                                placeholder="(123) 123-4567"
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div className="form-group-row">
-                                            <div className="form-group">
-                                                <label className="form-label" htmlFor="preferredDate">Preferred Date *</label>
-                                                <input
-                                                    type="date"
-                                                    id="preferredDate"
-                                                    name="preferredDate"
-                                                    className="form-input"
-                                                    min={today}
-                                                    value={formData.preferredDate}
-                                                    onChange={handleChange}
-                                                    required
-                                                />
-                                            </div>
-
-                                            <div className="form-group">
-                                                <label className="form-label" htmlFor="preferredTime">Preferred Time *</label>
-                                                <select
-                                                    id="preferredTime"
-                                                    name="preferredTime"
-                                                    className="form-select"
-                                                    value={formData.preferredTime}
-                                                    onChange={handleChange}
-                                                    required
-                                                >
-                                                    <option value="">Select time</option>
-                                                    <option value="09:00 AM">09:00 AM</option>
-                                                    <option value="10:00 AM">10:00 AM</option>
-                                                    <option value="11:00 AM">11:00 AM</option>
-                                                    <option value="12:00 PM">12:00 PM</option>
-                                                    <option value="01:00 PM">01:00 PM</option>
-                                                    <option value="02:00 PM">02:00 PM</option>
-                                                    <option value="03:00 PM">03:00 PM</option>
-                                                    <option value="04:00 PM">04:00 PM</option>
-                                                    <option value="05:00 PM">05:00 PM</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label" htmlFor="message">Message / Property Details *</label>
-                                            <textarea
-                                                id="message"
-                                                name="message"
-                                                className="form-textarea"
-                                                placeholder="Tell me about your real estate needs and what you'd like to discuss..."
-                                                value={formData.message}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </div>
-
-                                        <motion.button
-                                            type="submit"
-                                            className="submit-btn"
-                                            disabled={isSubmitting}
-                                            whileHover={{ scale: 1.01 }}
-                                            whileTap={{ scale: 0.99 }}
-                                        >
-                                            <span>{isSubmitting ? 'Scheduling...' : 'Request Meeting'}</span>
-                                        </motion.button>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-
-                            {submitStatus === 'success' && (
-                                <div className="status-message status-success">
-                                    {activeTab === 'message'
-                                        ? '✓ Message sent successfully! I\'ll get back to you soon.'
-                                        : '✓ Meeting request sent! You\'ll receive a Google Calendar invite soon.'
-                                    }
-                                </div>
-                            )}
-
-                            {submitStatus === 'error' && (
-                                <div className="status-message status-error">
-                                    ✗ Failed to send. Please try again or contact directly.
-                                </div>
-                            )}
-                        </form>
-                    </motion.div>
-                </div>
+                <h3 className="info-title">Phone</h3>
+              </div>
+              <p className="info-text">
+                <a href="tel:+15712441254" className="info-link">
+                  (571) 244-1254
+                </a>
+              </p>
             </motion.div>
-        </section>
-    );
+
+            <motion.div
+              className="info-card"
+              whileHover={{ y: -6 }}
+            >
+              <div className="info-icon-wrapper">
+                <div className="info-icon">
+                  <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
+                    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="currentColor" strokeWidth="2" fill="none" />
+                    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
+                </div>
+                <h3 className="info-title">Office</h3>
+              </div>
+              <p className="info-text">
+                Fairfax, VA<br />
+                DMV Realty, INC.
+              </p>
+            </motion.div>
+          </motion.div>
+
+          {/* Contact Form with Tabs */}
+          <motion.div variants={itemVariants}>
+            <form className="contact-form" onSubmit={handleSubmit}>
+              {/* Tab Buttons */}
+              <div className="tab-buttons">
+                <button
+                  type="button"
+                  className={`tab-btn ${activeTab === 'message' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('message')}
+                >
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
+                  Send Message
+                </button>
+                <button
+                  type="button"
+                  className={`tab-btn ${activeTab === 'meeting' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('meeting')}
+                >
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
+                  Schedule Meeting
+                </button>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {activeTab === 'message' ? (
+                  <motion.div
+                    key="message"
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h3 className="form-title">Send Me a Message</h3>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="name">Your Name *</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        className="form-input"
+                        placeholder="kharel realty"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="email">Email Address *</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        className="form-input"
+                        placeholder="your@email.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="phone">Phone Number</label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        className="form-input"
+                        placeholder="(123) 123-4567"
+                        value={formData.phone}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="message">Your Message *</label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        className="form-textarea"
+                        placeholder="Tell me about your real estate needs..."
+                        value={formData.message}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <motion.button
+                      type="submit"
+                      className="submit-btn"
+                      disabled={isSubmitting}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                    >
+                      <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="meeting"
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h3 className="form-title">Schedule Your Consultation</h3>
+
+                    <div className="schedule-notice">
+                      <svg width="20" height="20" fill="#3b82f6" viewBox="0 0 24 24">
+                        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" fill="none" />
+                      </svg>
+                      <p className="schedule-notice-text">
+                        I'll review your request and send you a Google Calendar invite to confirm the meeting.
+                      </p>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="name">Your Name *</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        className="form-input"
+                        placeholder="kharel realty"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="email">Email Address *</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        className="form-input"
+                        placeholder="your@email.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="phone">Phone Number</label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        className="form-input"
+                        placeholder="(123) 123-4567"
+                        value={formData.phone}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="form-group-row">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="preferredDate">Preferred Date *</label>
+                        <input
+                          type="date"
+                          id="preferredDate"
+                          name="preferredDate"
+                          className="form-input"
+                          min={today}
+                          value={formData.preferredDate}
+                          onChange={handleChange}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="preferredTime">Preferred Time *</label>
+                        <select
+                          id="preferredTime"
+                          name="preferredTime"
+                          className="form-select"
+                          value={formData.preferredTime}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="">Select time</option>
+                          <option value="09:00 AM">09:00 AM</option>
+                          <option value="10:00 AM">10:00 AM</option>
+                          <option value="11:00 AM">11:00 AM</option>
+                          <option value="12:00 PM">12:00 PM</option>
+                          <option value="01:00 PM">01:00 PM</option>
+                          <option value="02:00 PM">02:00 PM</option>
+                          <option value="03:00 PM">03:00 PM</option>
+                          <option value="04:00 PM">04:00 PM</option>
+                          <option value="05:00 PM">05:00 PM</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="message">Message / Property Details *</label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        className="form-textarea"
+                        placeholder="Tell me about your real estate needs and what you'd like to discuss..."
+                        value={formData.message}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <motion.button
+                      type="submit"
+                      className="submit-btn"
+                      disabled={isSubmitting}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                    >
+                      <span>{isSubmitting ? 'Scheduling...' : 'Request Meeting'}</span>
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {submitStatus === 'success' && (
+                <div className="status-message status-success">
+                  {activeTab === 'message'
+                    ? '✓ Message sent successfully! I\'ll get back to you soon.'
+                    : '✓ Meeting request sent! You\'ll receive a Google Calendar invite soon.'
+                  }
+                </div>
+              )}
+
+              {submitStatus === 'error' && (
+                <div className="status-message status-error">
+                  ✗ Failed to send. Please try again or contact directly.
+                </div>
+              )}
+            </form>
+          </motion.div>
+        </div>
+      </motion.div>
+    </section>
+  );
 };
 
 export default Contact;

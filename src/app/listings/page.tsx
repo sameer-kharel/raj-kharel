@@ -537,6 +537,52 @@ export default function ListingsPage() {
           .listings-grid {
             grid-template-columns: 1fr;
           }
+
+          .filter-bar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
+
+          .search-btn {
+            grid-column: 1 / -1;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .featured-image-container {
+            height: 300px;
+          }
+
+          .featured-info-card {
+            padding: 24px;
+          }
+
+          .filter-bar {
+            grid-template-columns: 1fr;
+          }
+
+          .filter-item {
+            padding: 14px 18px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .featured-info-card {
+            padding: 20px;
+          }
+
+          .property-price {
+            font-size: 24px;
+          }
+
+          .filter-bar {
+            padding: 16px 20px;
+          }
+
+          .search-btn {
+            padding: 14px 28px;
+          }
         }
       `}</style>
 

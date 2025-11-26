@@ -404,6 +404,42 @@ export default function PropertiesPage() {
             grid-template-columns: 1fr;
           }
         }
+
+        @media (max-width: 640px) {
+          .featured-image-container {
+            height: 300px;
+          }
+
+          .featured-info-card {
+            padding: 24px;
+          }
+
+          .property-stats {
+            gap: 16px;
+          }
+
+          .stat-value {
+            font-size: 20px;
+          }
+
+          .stat-label {
+            font-size: 12px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .featured-info-card {
+            padding: 20px;
+          }
+
+          .property-price {
+            font-size: 24px;
+          }
+
+          .listing-card {
+            border-radius: 16px;
+          }
+        }
       `}</style>
 
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>

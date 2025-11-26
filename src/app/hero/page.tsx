@@ -414,15 +414,41 @@ const Hero = () => {
         }
 
         @media (max-width: 768px) {
+          .hero-container { padding: 0 24px; }
           .hero-title { font-size: 60px; letter-spacing: -3px; }
           .hero-subtitle { font-size: 14px; }
-          .hero-3d-wrapper { width: 380px; height: 480px; }
+          .hero-3d-wrapper { 
+            width: min(380px, 90vw); 
+            height: min(480px, 100vw); 
+          }
         }
 
         @media (max-width: 480px) {
+          .hero-container { padding: 0 20px; }
           .hero-title { font-size: 48px; letter-spacing: -2px; }
-          .hero-subtitle { font-size: 12px; }
-          .hero-3d-wrapper { width: 320px; height: 400px; }
+          .hero-subtitle { font-size: 12px; letter-spacing: 1.5px; }
+          .hero-3d-wrapper { 
+            width: min(320px, 85vw); 
+            height: min(400px, 95vw); 
+          }
+          .scroll-indicator { font-size: 12px; }
+          .scroll-arrow { width: 24px; height: 40px; }
+        }
+
+        @media (max-width: 380px) {
+          .hero-title { 
+            font-size: 42px; 
+            letter-spacing: -1.5px; 
+          }
+          .hero-subtitle { 
+            font-size: 11px; 
+            letter-spacing: 1.2px; 
+          }
+          .hero-3d-wrapper { 
+            width: min(280px, 80vw); 
+            height: min(350px, 90vw); 
+          }
+          .hero-container { padding: 0 16px; }
         }
       `}</style>
 

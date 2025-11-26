@@ -4,42 +4,36 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import CalculatorNavigation from '../../components/CalculatorNavigation';
 
-export default function DebtConsolidationCalculator() {
-    const [debt1, setDebt1] = useState('');
-    const [rate1, setRate1] = useState('');
-    const [debt2, setDebt2] = useState('');
-    const [rate2, setRate2] = useState('');
-    const [consolidationRate, setConsolidationRate] = useState('');
-    const [term, setTerm] = useState('');
-    const [result, setResult] = useState<{ current: string, consolidated: string, savings: string } | null>(null);
+export default function CreditCardPayoffCalculator() {
+    const [balance, setBalance] = useState('');
+    const [apr, setApr] = useState('');
+    const [monthlyPayment, setMonthlyPayment] = useState('');
+    const [result, setResult] = useState<{ months: string, totalPaid: string, interest: string } | null>(null);
     const [showResult, setShowResult] = useState(false);
 
-    const calculateConsolidation = () => {
-        const d1 = parseFloat(debt1 || '0');
-        const r1 = parseFloat(rate1 || '0') / 100 / 12;
-        const d2 = parseFloat(debt2 || '0');
-        const r2 = parseFloat(rate2 || '0') / 100 / 12;
-        const totalDebt = d1 + d2;
-        const consRate = parseFloat(consolidationRate) / 100 / 12;
-        const n = parseFloat(term) * 12;
+    const calculatePayoff = () => {
+        const B = parseFloat(balance);
+        const r = parseFloat(apr) / 100 / 12;
+        const P = parseFloat(monthlyPayment);
 
-        if (totalDebt <= 0 || isNaN(consRate) || isNaN(n) || n <= 0) {
+        if (isNaN(B) || isNaN(r) || isNaN(P) || B <= 0 || r < 0 || P <= 0) {
             alert('Please enter valid numbers.');
             return;
         }
 
-        const currentN = 60;
-        const payment1 = d1 > 0 ? d1 * (r1 * Math.pow(1 + r1, currentN)) / (Math.pow(1 + r1, currentN) - 1) : 0;
-        const payment2 = d2 > 0 ? d2 * (r2 * Math.pow(1 + r2, currentN)) / (Math.pow(1 + r2, currentN) - 1) : 0;
-        const currentPayment = payment1 + payment2;
+        if (P <= B * r) {
+            alert('Monthly payment must be greater than the monthly interest to pay off the balance.');
+            return;
+        }
 
-        const consolidatedPayment = totalDebt * (consRate * Math.pow(1 + consRate, n)) / (Math.pow(1 + consRate, n) - 1);
-        const savings = currentPayment - consolidatedPayment;
+        const months = Math.ceil(Math.log(P / (P - B * r)) / Math.log(1 + r));
+        const totalPaid = P * months;
+        const interest = totalPaid - B;
 
         setResult({
-            current: `$${currentPayment.toFixed(2)}`,
-            consolidated: `$${consolidatedPayment.toFixed(2)}`,
-            savings: `$${Math.abs(savings).toFixed(2)}`
+            months: months.toString(),
+            totalPaid: `$${totalPaid.toFixed(2)}`,
+            interest: `$${interest.toFixed(2)}`
         });
         setShowResult(true);
     };
@@ -124,15 +118,6 @@ export default function DebtConsolidationCalculator() {
                     color: #6b7280;
                     font-size: 15px;
                     margin: 0;
-                }
-
-                .section-title {
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: #374151;
-                    margin-bottom: 16px;
-                    padding-bottom: 8px;
-                    border-bottom: 1px solid #e5e7eb;
                 }
 
                 .form-grid {
@@ -256,10 +241,31 @@ export default function DebtConsolidationCalculator() {
                     to { opacity: 1; transform: translateY(0); }
                 }
 
-                .result-grid-3 {
+                .result-label {
+                    color: #0369a1;
+                    font-size: 14px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin-bottom: 12px;
+                }
+
+                .result-value {
+                    color: #0c4a6e;
+                    font-size: 48px;
+                    font-weight: 800;
+                    margin: 0;
+                    line-height: 1;
+                    letter-spacing: -1px;
+                }
+
+                .result-grid {
                     display: grid;
-                    grid-template-columns: repeat(3, 1fr);
+                    grid-template-columns: repeat(2, 1fr);
                     gap: 24px;
+                    margin-top: 24px;
+                    padding-top: 24px;
+                    border-top: 1px solid #bae6fd;
                 }
 
                 .result-item-label {
@@ -314,35 +320,13 @@ export default function DebtConsolidationCalculator() {
                         gap: 20px;
                     }
 
-                    .result-grid-3 {
+                    .result-value {
+                        font-size: 36px;
+                    }
+                    
+                    .result-grid {
                         grid-template-columns: 1fr;
                         gap: 16px;
-                    }
-                }
-
-
-                @media (max-width: 640px) {
-                    .form-grid {
-                        grid-template-columns: 1fr;
-                        gap: 18px;
-                    }
-
-                    .form-input, .form-select {
-                        font-size: 16px;
-                        padding: 14px 18px;
-                    }
-
-                    .form-input.has-prefix {
-                        padding-left: 38px;
-                    }
-
-                    .form-input.has-suffix {
-                        padding-right: 50px;
-                    }
-
-                    .calculate-button {
-                        padding: 18px;
-                        font-size: 15px;
                     }
                 }
 
@@ -361,18 +345,6 @@ export default function DebtConsolidationCalculator() {
                         width: 24px;
                         height: 24px;
                     }
-
-                    .result-value {
-                        font-size: 32px;
-                    }
-
-                    .result-item-value {
-                        font-size: 20px;
-                    }
-
-                    .calculator-page {
-                        padding: 20px 12px;
-                    }
                 }
             `}</style>
 
@@ -385,90 +357,62 @@ export default function DebtConsolidationCalculator() {
                 </Link>
 
                 <div className="calculator-card">
-                    <CalculatorNavigation currentPath="/calculators/debt-consolidation" />
+                    <CalculatorNavigation currentPath="/calculators/credit-card-payoff" />
 
                     <div className="calculator-header">
                         <div className="calculator-icon">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                             </svg>
                         </div>
-                        <h1 className="calculator-title">Debt Consolidation</h1>
-                        <p className="calculator-subtitle">Compare current debts with a consolidated loan</p>
+                        <h1 className="calculator-title">Credit Card Payoff</h1>
+                        <p className="calculator-subtitle">Calculate how long it will take to pay off your credit card</p>
                     </div>
 
-                    <div>
-                        <h3 className="section-title">Current Debts</h3>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">Debt 1 Amount</label>
-                                <div className="input-wrapper">
-                                    <span className="input-prefix">$</span>
-                                    <input type="number" className="form-input has-prefix" placeholder="5,000" value={debt1} onChange={(e) => setDebt1(e.target.value)} />
-                                </div>
+                    <div className="form-grid">
+                        <div className="form-group">
+                            <label className="form-label">Current Balance <span className="required">*</span></label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="5,000" value={balance} onChange={(e) => setBalance(e.target.value)} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Rate 1</label>
-                                <div className="input-wrapper">
-                                    <input type="number" step="0.01" className="form-input has-suffix" placeholder="18" value={rate1} onChange={(e) => setRate1(e.target.value)} />
-                                    <span className="input-suffix">%</span>
-                                </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Annual APR <span className="required">*</span></label>
+                            <div className="input-wrapper">
+                                <input type="number" step="0.01" className="form-input has-suffix" placeholder="18.99" value={apr} onChange={(e) => setApr(e.target.value)} />
+                                <span className="input-suffix">%</span>
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Debt 2 Amount</label>
-                                <div className="input-wrapper">
-                                    <span className="input-prefix">$</span>
-                                    <input type="number" className="form-input has-prefix" placeholder="3,000" value={debt2} onChange={(e) => setDebt2(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Rate 2</label>
-                                <div className="input-wrapper">
-                                    <input type="number" step="0.01" className="form-input has-suffix" placeholder="15" value={rate2} onChange={(e) => setRate2(e.target.value)} />
-                                    <span className="input-suffix">%</span>
-                                </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Monthly Payment <span className="required">*</span></label>
+                            <div className="input-wrapper">
+                                <span className="input-prefix">$</span>
+                                <input type="number" className="form-input has-prefix" placeholder="200" value={monthlyPayment} onChange={(e) => setMonthlyPayment(e.target.value)} />
                             </div>
                         </div>
                     </div>
 
-                    <div>
-                        <h3 className="section-title">Consolidated Loan</h3>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label className="form-label">Consolidation Rate <span className="required">*</span></label>
-                                <div className="input-wrapper">
-                                    <input type="number" step="0.01" className="form-input has-suffix" placeholder="8" value={consolidationRate} onChange={(e) => setConsolidationRate(e.target.value)} />
-                                    <span className="input-suffix">%</span>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Loan Term <span className="required">*</span></label>
-                                <div className="input-wrapper">
-                                    <input type="number" className="form-input has-suffix" placeholder="5" value={term} onChange={(e) => setTerm(e.target.value)} />
-                                    <span className="input-suffix">years</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button onClick={calculateConsolidation} className="calculate-button">Compare Options</button>
+                    <button onClick={calculatePayoff} className="calculate-button">Calculate Payoff Time</button>
 
                     {showResult && result && (
                         <div className="result-card">
-                            <div className="result-grid-3">
+                            <p className="result-label">Months to Pay Off</p>
+                            <p className="result-value">{result.months}</p>
+
+                            <div className="result-grid">
                                 <div className="result-item">
-                                    <p className="result-item-label">Current Payment</p>
-                                    <p className="result-item-value">{result.current}</p>
+                                    <p className="result-item-label">Total Paid</p>
+                                    <p className="result-item-value">{result.totalPaid}</p>
                                 </div>
                                 <div className="result-item">
-                                    <p className="result-item-label">Consolidated Payment</p>
-                                    <p className="result-item-value">{result.consolidated}</p>
-                                </div>
-                                <div className="result-item">
-                                    <p className="result-item-label">Monthly Savings</p>
-                                    <p className="result-item-value">{result.savings}</p>
+                                    <p className="result-item-label">Total Interest</p>
+                                    <p className="result-item-value">{result.interest}</p>
                                 </div>
                             </div>
+
                             <div className="result-warning">
                                 <svg className="warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

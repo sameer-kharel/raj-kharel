@@ -85,7 +85,7 @@ export default function ReviewsPage() {
 
         .reviews-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           gap: 32px;
           margin-top: 40px;
         }
@@ -253,6 +253,37 @@ export default function ReviewsPage() {
 
           .review-text {
             font-size: 15px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .reviews-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+
+          .review-card {
+            padding: 28px 24px;
+          }
+
+          .section-title {
+            font-size: 32px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .review-card {
+            padding: 24px 20px;
+          }
+
+          .reviewer-avatar {
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+          }
+
+          .quote-icon {
+            font-size: 60px;
           }
         }
       `}</style>

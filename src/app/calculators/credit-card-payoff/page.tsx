@@ -330,6 +330,32 @@ export default function CreditCardPayoffCalculator() {
                     }
                 }
 
+
+                @media (max-width: 640px) {
+                    .form-grid {
+                        grid-template-columns: 1fr;
+                        gap: 18px;
+                    }
+
+                    .form-input, .form-select {
+                        font-size: 16px;
+                        padding: 14px 18px;
+                    }
+
+                    .form-input.has-prefix {
+                        padding-left: 38px;
+                    }
+
+                    .form-input.has-suffix {
+                        padding-right: 50px;
+                    }
+
+                    .calculate-button {
+                        padding: 18px;
+                        font-size: 15px;
+                    }
+                }
+
                 @media (max-width: 480px) {
                     .calculator-card {
                         padding: 20px;
@@ -344,6 +370,18 @@ export default function CreditCardPayoffCalculator() {
                     .calculator-icon svg {
                         width: 24px;
                         height: 24px;
+                    }
+
+                    .result-value {
+                        font-size: 32px;
+                    }
+
+                    .result-item-value {
+                        font-size: 20px;
+                    }
+
+                    .calculator-page {
+                        padding: 20px 12px;
                     }
                 }
             `}</style>

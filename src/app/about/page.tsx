@@ -281,6 +281,16 @@ const About = () => {
           box-shadow: 0 2px 15px rgba(59, 130, 246, 0.4);
         }
 
+        @media (max-width: 900px) {
+          .content-card {
+            padding: 36px 28px;
+          }
+
+          .image-container {
+            height: 500px;
+          }
+        }
+
         @media (max-width: 768px) {
           .content-card {
             padding: 32px 24px;
@@ -291,7 +301,41 @@ const About = () => {
           }
 
           .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+          }
+
+          .section-title {
+            font-size: clamp(32px, 4.5vw, 48px);
+          }
+        }
+
+        @media (max-width: 600px) {
+          .stats-grid {
             grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
+          .image-container {
+            height: 350px;
+          }
+
+          .content-text {
+            font-size: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .content-card {
+            padding: 28px 20px;
+          }
+
+          .image-container {
+            height: 300px;
+          }
+
+          .stat-card {
+            padding: 32px 24px;
           }
         }
       `}</style>
@@ -380,7 +424,7 @@ const About = () => {
           </motion.div>
 
           {/* Content Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '60px', alignItems: 'center', marginBottom: '60px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px', alignItems: 'center', marginBottom: '60px' }}>
             {/* Text Content */}
             <motion.div
               variants={itemVariants}
