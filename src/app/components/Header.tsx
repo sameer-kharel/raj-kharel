@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [isMobileToolsOpen, setIsMobileToolsOpen] = useState(false);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -218,6 +219,12 @@ const Header = () => {
           }
         }
 
+        @media (max-width: 768px) {
+          .desktop-tools-dropdown {
+            display: none !important;
+          }
+        }
+
         @media (max-width: 600px) {
           .tools-grid {
             grid-template-columns: 1fr;
@@ -315,8 +322,9 @@ const Header = () => {
               </div>
             </button>}
 
-            {/* Tools Dropdown in Header */}
+            {/* Tools Dropdown */}
             <div
+              className="tools-dropdown desktop-tools-dropdown"
               style={{ position: 'relative' }}
               onMouseEnter={() => setIsToolsOpen(true)}
               onMouseLeave={() => setIsToolsOpen(false)}
@@ -561,6 +569,106 @@ const Header = () => {
                     </motion.li>
                   ))}
 
+                  {/* Tools Menu Item */}
+                  <motion.li
+                    style={{ margin: '1rem 0' }}
+                    custom={navItems.length}
+                    variants={itemVariants}
+                    initial="closed"
+                    animate="open"
+                    exit="closed"
+                  >
+                    <button
+                      onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
+                      style={{
+                        fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+                        fontWeight: 'bold',
+                        color: 'white',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        transition: 'transform 0.3s, color 0.3s',
+                        padding: 0,
+                        margin: '0 auto'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateX(8px)';
+                        e.currentTarget.style.color = '#e5e7eb';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateX(0)';
+                        e.currentTarget.style.color = 'white';
+                      }}
+                    >
+                      Tools
+                      <motion.span
+                        style={{ fontSize: '1.5rem' }}
+                        animate={{ rotate: isMobileToolsOpen ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        ▼
+                      </motion.span>
+                    </button>
+
+                    {/* Mobile Tools Submenu */}
+                    <AnimatePresence>
+                      {isMobileToolsOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            marginTop: '1rem',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          {calculatorTools.map((tool, index) => (
+                            <motion.div
+                              key={tool.href}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{
+                                duration: 0.3,
+                                delay: index * 0.05
+                              }}
+                              style={{ marginBottom: '0.75rem' }}
+                            >
+                              <Link
+                                href={tool.href}
+                                onClick={() => {
+                                  setIsMenuOpen(false);
+                                  setIsMobileToolsOpen(false);
+                                }}
+                                style={{
+                                  fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+                                  color: '#d1d5db',
+                                  textDecoration: 'none',
+                                  display: 'block',
+                                  transition: 'all 0.3s',
+                                  padding: '0.5rem 0',
+                                  paddingLeft: '2rem'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.color = 'white';
+                                  e.currentTarget.style.transform = 'translateX(8px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = '#d1d5db';
+                                  e.currentTarget.style.transform = 'translateX(0)';
+                                }}
+                              >
+                                📊 {tool.name}
+                              </Link>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.li>
 
                 </ul>
               </div>
@@ -572,4 +680,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Header
