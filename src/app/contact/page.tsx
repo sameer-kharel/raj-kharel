@@ -303,6 +303,13 @@ const Contact = () => {
           margin-bottom: 28px;
         }
 
+        @media (max-width: 768px) {
+          .form-group-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+          }
+        }
+
         .form-label {
           display: block;
           font-size: 14px;
@@ -326,6 +333,10 @@ const Contact = () => {
           transition: all 0.3s ease;
           outline: none;
           font-family: inherit;
+          box-sizing: border-box;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
         }
 
         .form-input:focus,
@@ -343,16 +354,41 @@ const Contact = () => {
 
         .form-select {
           cursor: pointer;
+          background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 20px center;
+          padding-right: 48px;
         }
 
         .form-select option {
           background: white;
           color: #0f172a;
+          padding: 12px;
         }
 
         .form-textarea {
           min-height: 140px;
           resize: vertical;
+          line-height: 1.6;
+        }
+
+        /* Date and Time Input Styling */
+        input[type="date"],
+        input[type="time"] {
+          position: relative;
+          cursor: pointer;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+          cursor: pointer;
+          opacity: 0.6;
+          transition: opacity 0.3s ease;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover,
+        input[type="time"]::-webkit-calendar-picker-indicator:hover {
+          opacity: 1;
         }
 
         .schedule-notice {
@@ -393,6 +429,10 @@ const Contact = () => {
           box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
           position: relative;
           overflow: hidden;
+          min-height: 60px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .submit-btn::before {
@@ -423,6 +463,22 @@ const Contact = () => {
           transform: none;
         }
 
+        @media (max-width: 768px) {
+          .submit-btn {
+            min-height: 56px;
+            padding: 18px 32px;
+            font-size: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .submit-btn {
+            min-height: 52px;
+            padding: 16px 28px;
+            font-size: 15px;
+          }
+        }
+
         .submit-btn span {
           position: relative;
           z-index: 1;
@@ -450,25 +506,66 @@ const Contact = () => {
           color: #991b1b;
         }
 
+        @media (max-width: 1200px) {
+          .section-title {
+            font-size: 48px;
+          }
+
+          .contact-grid {
+            gap: 60px;
+          }
+        }
+
         @media (max-width: 1024px) {
           .contact-grid {
             grid-template-columns: 1fr;
-            gap: 60px;
+            gap: 50px;
           }
 
           .section-title {
-            font-size: 44px;
+            font-size: 42px;
+            letter-spacing: -1.5px;
+          }
+
+          .section-subtitle {
+            font-size: 18px;
+          }
+
+          .section-header {
+            margin-bottom: 60px;
           }
 
           .form-group-row {
             grid-template-columns: 1fr;
             gap: 0;
           }
+
+          .contact-form {
+            padding: 48px 40px;
+          }
         }
 
         @media (max-width: 768px) {
+          section {
+            padding: 80px 24px !important;
+          }
+
           .section-title {
-            font-size: 36px;
+            font-size: 34px;
+            letter-spacing: -1px;
+          }
+
+          .section-subtitle {
+            font-size: 17px;
+            padding: 0 16px;
+          }
+
+          .section-header {
+            margin-bottom: 50px;
+          }
+
+          .contact-grid {
+            gap: 40px;
           }
 
           .contact-form {
@@ -481,61 +578,311 @@ const Contact = () => {
           }
 
           .info-icon-wrapper {
-            flex-direction: column;
-            align-items: flex-start;
+            flex-direction: row;
+            align-items: center;
+          }
+
+          .info-card {
+            padding: 30px 24px;
           }
 
           .tab-btn {
             font-size: 13px;
-            padding: 16px 16px;
+            padding: 14px 12px;
             min-height: 48px;
+          }
+
+          .form-title {
+            font-size: 26px;
+          }
+
+          .form-group-row {
+            gap: 0;
           }
         }
 
         @media (max-width: 640px) {
-          .form-group-row {
-            grid-template-columns: 1fr;
-            gap: 0;
-          }
-
-          .contact-form {
-            padding: 32px 24px;
-            border-radius: 24px;
+          section {
+            padding: 60px 20px !important;
           }
 
           .section-title {
-            font-size: 32px;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+          }
+
+          .section-subtitle {
+            font-size: 16px;
+            padding: 0 8px;
+          }
+
+          .section-badge {
+            font-size: 12px;
+            padding: 8px 20px;
+            margin-bottom: 20px;
+          }
+
+          .section-header {
+            margin-bottom: 40px;
+          }
+
+          .contact-grid {
+            gap: 32px;
+          }
+
+          .contact-form {
+            padding: 28px 20px;
+            border-radius: 20px;
+          }
+
+          .form-title {
+            font-size: 22px;
+            margin-bottom: 20px;
           }
 
           .form-input,
           .form-textarea,
           .form-select {
             font-size: 16px;
-            padding: 16px 20px;
+            padding: 14px 18px;
+            min-height: 50px;
           }
-        }
 
-        @media (max-width: 480px) {
-          .contact-form {
-            padding: 28px 20px;
+          .form-select {
+            background-position: right 16px center;
+            padding-right: 44px;
+          }
+
+          .form-label {
+            font-size: 13px;
+            margin-bottom: 8px;
+          }
+
+          .form-group {
+            margin-bottom: 24px;
+          }
+
+          .form-group-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+            margin-bottom: 24px;
           }
 
           .info-card {
-            padding: 28px 24px;
+            padding: 24px 20px;
+          }
+
+          .info-icon {
+            width: 50px;
+            height: 50px;
+          }
+
+          .info-icon svg {
+            width: 24px;
+            height: 24px;
+          }
+
+          .info-title {
+            font-size: 20px;
+          }
+
+          .info-text {
+            font-size: 16px;
+          }
+
+          .tab-buttons {
+            gap: 8px;
+            padding: 6px;
           }
 
           .tab-btn {
             font-size: 12px;
-            padding: 14px 12px;
+            padding: 12px 10px;
+            letter-spacing: 0.3px;
           }
 
-          .form-title {
-            font-size: 24px;
+          .tab-btn svg {
+            width: 16px;
+            height: 16px;
           }
 
           .submit-btn {
-            padding: 18px 32px;
+            padding: 16px 28px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+          }
+
+          .schedule-notice {
+            padding: 14px 16px;
+            margin-bottom: 24px;
+          }
+
+          .schedule-notice-text {
+            font-size: 13px;
+          }
+
+          .status-message {
+            margin-top: 16px;
+            padding: 14px 16px;
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          section {
+            padding: 50px 16px !important;
+          }
+
+          .section-title {
+            font-size: 24px;
+            letter-spacing: -0.3px;
+          }
+
+          .section-subtitle {
+            font-size: 15px;
+            line-height: 1.6;
+          }
+
+          .section-badge {
+            font-size: 11px;
+            padding: 7px 18px;
+            letter-spacing: 1px;
+          }
+
+          .contact-form {
+            padding: 24px 16px;
+            border-radius: 18px;
+          }
+
+          .form-title {
+            font-size: 20px;
+            margin-bottom: 18px;
+          }
+
+          .info-card {
+            padding: 20px 16px;
+            border-radius: 16px;
+          }
+
+          .info-icon-wrapper {
+            gap: 14px;
+            margin-bottom: 12px;
+          }
+
+          .info-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+          }
+
+          .info-icon svg {
+            width: 22px;
+            height: 22px;
+          }
+
+          .info-title {
+            font-size: 18px;
+          }
+
+          .info-text {
+            font-size: 15px;
+            line-height: 1.6;
+          }
+
+          .tab-btn {
+            font-size: 11px;
+            padding: 11px 8px;
+            gap: 6px;
+          }
+
+          .tab-btn svg {
+            width: 14px;
+            height: 14px;
+          }
+
+          .form-input,
+          .form-textarea,
+          .form-select {
             font-size: 16px;
+            padding: 13px 16px;
+            border-radius: 12px;
+            min-height: 48px;
+          }
+
+          .form-select {
+            background-position: right 14px center;
+            padding-right: 40px;
+          }
+
+          .form-label {
+            font-size: 12px;
+            letter-spacing: 0.5px;
+          }
+
+          .form-group {
+            margin-bottom: 20px;
+          }
+
+          .form-textarea {
+            min-height: 120px;
+          }
+
+          .submit-btn {
+            padding: 15px 24px;
+            font-size: 14px;
+            border-radius: 12px;
+          }
+
+          .schedule-notice {
+            padding: 12px 14px;
+            gap: 10px;
+          }
+
+          .schedule-notice svg {
+            width: 18px;
+            height: 18px;
+          }
+
+          .schedule-notice-text {
+            font-size: 12px;
+            line-height: 1.5;
+          }
+
+          .status-message {
+            font-size: 13px;
+            padding: 12px 14px;
+          }
+        }
+
+        @media (max-width: 375px) {
+          section {
+            padding: 40px 12px !important;
+          }
+
+          .section-title {
+            font-size: 22px;
+          }
+
+          .section-subtitle {
+            font-size: 14px;
+          }
+
+          .contact-form {
+            padding: 20px 14px;
+          }
+
+          .form-title {
+            font-size: 18px;
+          }
+
+          .tab-btn {
+            font-size: 10px;
+            padding: 10px 6px;
+          }
+
+          .info-card {
+            padding: 18px 14px;
           }
         }
       `}</style>
