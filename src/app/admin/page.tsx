@@ -38,6 +38,9 @@ const initialFormData = {
   status: 'active' as 'active' | 'pending',
 };
 
+// Admin password - In production, this should be environment variable and verified server-side
+const ADMIN_PASSWORD = '1254kharel';
+
 const styles = {
   container: {
     background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
@@ -287,6 +290,84 @@ const styles = {
     color: '#94a3b8',
     fontSize: '1rem',
   },
+  loginContainer: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#ffffff',
+    padding: '1rem',
+  },
+  loginCard: {
+    background: '#ffffff',
+    borderRadius: '24px',
+    padding: '3.5rem 3rem',
+    boxShadow: '0 0 1px rgba(0, 0, 0, 0.05), 0 20px 40px rgba(0, 0, 0, 0.08)',
+    maxWidth: '460px',
+    width: '100%',
+    border: '1px solid #e2e8f0',
+  },
+  loginTitle: {
+    fontSize: '2.25rem',
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: '0.75rem',
+    textAlign: 'center' as const,
+    letterSpacing: '-0.025em',
+  },
+  loginSubtitle: {
+    fontSize: '1rem',
+    color: '#64748b',
+    textAlign: 'center' as const,
+    marginBottom: '2.5rem',
+    lineHeight: '1.6',
+  },
+  loginInput: {
+    width: '100%',
+    padding: '1rem 1.25rem',
+    fontSize: '1rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '12px',
+    background: '#f8fafc',
+    transition: 'all 0.2s ease',
+    fontFamily: 'inherit',
+    marginBottom: '1.5rem',
+    boxSizing: 'border-box' as const,
+  },
+  loginButton: {
+    width: '100%',
+    padding: '1rem 1.5rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#ffffff',
+    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+    border: 'none',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+  },
+  loginError: {
+    background: '#fef2f2',
+    color: '#dc2626',
+    padding: '0.875rem 1.25rem',
+    borderRadius: '10px',
+    fontSize: '0.9375rem',
+    marginBottom: '1.25rem',
+    textAlign: 'center' as const,
+    border: '1px solid #fecaca',
+  },
+  logoutButton: {
+    padding: '0.625rem 1.25rem',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    color: '#dc2626',
+    background: '#fee2e2',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
 };
 
 const Icons = {
@@ -297,12 +378,67 @@ const Icons = {
   dollar: <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>,
 };
 
+const LoginButton = ({ children, ...props }: { children: ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <button
+      {...props}
+      style={{
+        ...styles.loginButton,
+        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+        boxShadow: isHovered
+          ? '0 8px 20px rgba(37, 99, 235, 0.4)'
+          : '0 4px 12px rgba(37, 99, 235, 0.3)',
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {children}
+    </button>
+  );
+};
+
+const LoginInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <input
+      {...props}
+      style={{
+        ...styles.loginInput,
+        borderColor: isFocused ? '#2563eb' : '#e2e8f0',
+        boxShadow: isFocused ? '0 0 0 3px rgba(37, 99, 235, 0.1)' : 'none',
+      }}
+      onFocus={(e) => {
+        setIsFocused(true);
+        props.onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        setIsFocused(false);
+        props.onBlur?.(e);
+      }}
+    />
+  );
+};
+
 export default function AdminDashboardPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState<Stats>({ activeListings: 0, soldProperties: 0, totalValue: 0 });
   const [listings, setListings] = useState<Listing[]>([]);
   const [soldProperties, setSoldProperties] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Check if user is already authenticated on mount
+  useEffect(() => {
+    const authStatus = sessionStorage.getItem('adminAuthenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -311,8 +447,27 @@ export default function AdminDashboardPage() {
         fetch('/api/admin/listings'),
         fetch('/api/sold-properties'),
       ]);
-      const listingsData: Listing[] = await listingsRes.json();
-      const soldData: Listing[] = await soldRes.json();
+
+      let listingsData: Listing[] = [];
+      let soldData: Listing[] = [];
+
+      // Check if responses are ok and parse JSON
+      if (listingsRes.ok) {
+        try {
+          listingsData = await listingsRes.json();
+        } catch (e) {
+          console.error("Failed to parse listings data:", e);
+        }
+      }
+
+      if (soldRes.ok) {
+        try {
+          soldData = await soldRes.json();
+        } catch (e) {
+          console.error("Failed to parse sold properties data:", e);
+        }
+      }
+
       setListings(listingsData);
       setSoldProperties(soldData);
       const totalValue = soldData.reduce((sum, prop) => sum + (prop.soldPrice || prop.price), 0);
@@ -323,23 +478,86 @@ export default function AdminDashboardPage() {
       });
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
+      // Set empty data on error
+      setListings([]);
+      setSoldProperties([]);
+      setStats({ activeListings: 0, soldProperties: 0, totalValue: 0 });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated]);
 
   const handleRefresh = () => fetchData();
+
+  const handleLogin = (e: FormEvent) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('adminAuthenticated', 'true');
+      setLoginError('');
+      setPassword('');
+    } else {
+      setLoginError('Incorrect password. Please try again.');
+      setPassword('');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('adminAuthenticated');
+    setActiveTab('dashboard');
+  };
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div style={styles.loginContainer}>
+        <div style={styles.loginCard}>
+          <h1 style={styles.loginTitle}>Admin Access</h1>
+          <p style={styles.loginSubtitle}>Enter your password to access the admin dashboard</p>
+
+          <form onSubmit={handleLogin}>
+            {loginError && <div style={styles.loginError}>{loginError}</div>}
+
+            <LoginInput
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter admin password"
+              autoFocus
+              required
+            />
+
+            <LoginButton type="submit">
+              Login to Dashboard
+            </LoginButton>
+          </form>
+
+
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
       <div style={styles.wrapper}>
         <header style={styles.header}>
-          <h1 style={styles.headerTitle}>Admin Dashboard</h1>
-          <p style={styles.headerSubtitle}>Manage your real estate portfolio with ease</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1 style={styles.headerTitle}>Admin Dashboard</h1>
+              <p style={styles.headerSubtitle}>Manage your real estate portfolio with ease</p>
+            </div>
+            <button onClick={handleLogout} style={styles.logoutButton}>
+              Logout
+            </button>
+          </div>
         </header>
 
         <div style={styles.statsGrid}>
