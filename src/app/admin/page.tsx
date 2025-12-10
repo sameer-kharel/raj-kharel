@@ -38,8 +38,7 @@ const initialFormData = {
   status: 'active' as 'active' | 'pending',
 };
 
-// Admin password - In production, this should be environment variable and verified server-side
-const ADMIN_PASSWORD = '1254kharel';
+
 
 const styles = {
   container: {
@@ -495,16 +494,33 @@ export default function AdminDashboardPage() {
 
   const handleRefresh = () => fetchData();
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('adminAuthenticated', 'true');
-      setLoginError('');
+    setLoginError('');
+
+    try {
+      const response = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem('adminAuthenticated', 'true');
+        setPassword('');
+      } else {
+        setLoginError('Incorrect password. Please try again.');
+        setPassword('');
+      }
+    } catch (error) {
+      setLoginError('Authentication failed. Please try again.');
       setPassword('');
-    } else {
-      setLoginError('Incorrect password. Please try again.');
-      setPassword('');
+      console.error('Login error:', error);
     }
   };
 
