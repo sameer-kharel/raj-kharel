@@ -220,9 +220,9 @@ const Footer = () => {
               <h4 className="footer-column-title">Get in Touch</h4>
               <ul className="footer-list">
                 <li>
-                  <a href="tel:+17031234567" className="footer-link contact-item" style={{ fontSize: '14px', fontWeight: '500' }}>
+                  <a href="tel:+1 (571) 244-1254" className="footer-link contact-item" style={{ fontSize: '14px', fontWeight: '500' }}>
                     <Phone size={16} />
-                    <span>(571) - 224 - 1254</span>
+                    <span>(571) - 244 - 1254</span>
                   </a>
                 </li>
                 <li>
@@ -231,7 +231,7 @@ const Footer = () => {
                     <span>kharelrealty@gmail.com</span>
                   </a>
                 </li>
-              </ul>   
+              </ul>
             </div>
           </div>
         </div>
