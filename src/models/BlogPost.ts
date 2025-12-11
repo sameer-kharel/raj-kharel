@@ -26,10 +26,10 @@ const BlogPostSchema = new Schema<IBlogPost>(
         },
         slug: {
             type: String,
-            required: true,
             unique: true,
             lowercase: true,
             trim: true,
+            sparse: true, // Allow null/undefined temporarily
         },
         content: {
             type: String,
@@ -80,13 +80,20 @@ const BlogPostSchema = new Schema<IBlogPost>(
 
 // Create slug from title before saving
 BlogPostSchema.pre('save', function (next) {
-    if (this.isModified('title')) {
+    if (!this.slug || this.isModified('title')) {
+        // Generate slug from title
         this.slug = this.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
+
+        // Add timestamp if slug might not be unique
+        if (this.isNew) {
+            this.slug = `${this.slug}-${Date.now()}`;
+        }
     }
     next();
 });
 
 export default mongoose.models.BlogPost || mongoose.model<IBlogPost>('BlogPost', BlogPostSchema);
+

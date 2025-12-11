@@ -1260,8 +1260,8 @@ const BlogNewsletterTab = () => {
                         {blogPosts.map((post) => (
                           <tr key={post._id}>
                             <td style={styles.td}>
-                              <div style={styles.propertyTitle}>{post.title}</div>
-                              <div style={styles.propertyAddress}>{post.excerpt.substring(0, 60)}...</div>
+                              <div style={{ ...styles.propertyTitle, color: '#1e293b' }}>{post.title}</div>
+                              <div style={{ ...styles.propertyAddress, color: '#64748b' }}>{post.excerpt.substring(0, 60)}...</div>
                             </td>
                             <td style={styles.td}>
                               <span style={{ ...styles.featureTag, background: '#f1f5f9', color: '#475569' }}>
@@ -1278,7 +1278,9 @@ const BlogNewsletterTab = () => {
                               </span>
                             </td>
                             <td style={styles.td}>
-                              {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
+                              <span style={{ color: '#1e293b' }}>
+                                {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
+                              </span>
                             </td>
                             <td style={{ ...styles.td, textAlign: 'right' }}>
                               <button
@@ -1339,10 +1341,12 @@ const BlogNewsletterTab = () => {
                       <tbody>
                         {subscribers.map((sub) => (
                           <tr key={sub._id}>
-                            <td style={styles.td}>{sub.email}</td>
-                            <td style={styles.td}>{sub.name || '-'}</td>
+                            <td style={{ ...styles.td, color: '#1e293b' }}>{sub.email}</td>
+                            <td style={{ ...styles.td, color: '#1e293b' }}>{sub.name || '-'}</td>
                             <td style={styles.td}>
-                              {new Date(sub.subscribedAt).toLocaleDateString()}
+                              <span style={{ color: '#1e293b' }}>
+                                {new Date(sub.subscribedAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
+                              </span>
                             </td>
                             <td style={styles.td}>
                               <span style={{
@@ -1498,6 +1502,13 @@ const BlogPostFormModal = ({ post, onClose, onSave }: { post: BlogPost | null, o
     try {
       let featuredImage = formData.featuredImage;
 
+      // For new posts, require an image
+      if (!post && !imageFile) {
+        alert('Please select a featured image');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Upload image if new file selected
       if (imageFile) {
         const imageFormData = new FormData();
@@ -1507,8 +1518,15 @@ const BlogPostFormModal = ({ post, onClose, onSave }: { post: BlogPost | null, o
           body: imageFormData,
         });
         const imageData = await imageRes.json();
-        if (!imageRes.ok) throw new Error('Failed to upload image');
+        if (!imageRes.ok) throw new Error(imageData.error || 'Failed to upload image');
         featuredImage = imageData.url;
+      }
+
+      // Validate we have an image
+      if (!featuredImage) {
+        alert('Featured image is required');
+        setIsSubmitting(false);
+        return;
       }
 
       const url = post ? `/api/admin/blog/${post._id}` : '/api/admin/blog';
@@ -1520,7 +1538,10 @@ const BlogPostFormModal = ({ post, onClose, onSave }: { post: BlogPost | null, o
         body: JSON.stringify({ ...formData, featuredImage }),
       });
 
-      if (!res.ok) throw new Error('Failed to save post');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to save post');
+      }
 
       alert(post ? 'Post updated!' : 'Post created!');
       onSave();

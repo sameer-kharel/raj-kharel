@@ -45,7 +45,6 @@ const About = () => {
   };
 
   const stats = [
-    { icon: <Home size={32} />, value: '50+', label: 'Properties Sold', color: '#3b82f6' },
     { icon: <Star size={32} />, value: '5/5', label: 'Client Rating', color: '#f59e0b' },
     { icon: <Users size={32} />, value: '50+', label: 'Happy Clients', color: '#10b981' },
     { icon: <Trophy size={32} />, value: '2+', label: 'Years Experience', color: '#8b5cf6' },
@@ -412,7 +411,7 @@ const About = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              With over 2 years of experience in the DMV area, I'm dedicated to helping you find your dream home.
+              With over years of experience in the DMV area, I'm dedicated to helping you find your dream home.
             </motion.p>
             <motion.div
               className="decorative-line"
@@ -436,8 +435,7 @@ const About = () => {
               <div className="content-card">
                 <p className="content-text">
                   Hi, I'm <strong>Raj Kharel</strong>, a dedicated real estate professional serving the DMV area
-                  (DC, Maryland, and Virginia). With over 2 years of experience in the industry, I specialize in
-                  helping clients buy and sell condos, townhouses, and single-family homes.
+                  (DC, Maryland, and Virginia). I specialize in helping clients buy and sell condos, townhouses, and single-family homes.
                 </p>
                 <p className="content-text">
                   My approach is simple: I listen to your needs, provide expert guidance, and work tirelessly to

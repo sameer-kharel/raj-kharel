@@ -59,9 +59,16 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Generate slug manually as fallback
+        const slug = title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '') + '-' + Date.now();
+
         // Create blog post
         const blogPost = new BlogPost({
             title,
+            slug, // Explicitly set the slug
             content,
             excerpt,
             featuredImage,
