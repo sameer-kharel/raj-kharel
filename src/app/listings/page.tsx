@@ -753,6 +753,12 @@ export default function ListingsPage() {
                   <h3 className="listing-title">{listing.title}</h3>
                   <p className="listing-address">{listing.address}</p>
 
+                  {listing.description && (
+                    <div className="property-description" style={{ fontSize: '13px', marginBottom: '12px', lineHeight: '1.5' }}>
+                      {listing.description}
+                    </div>
+                  )}
+
                   <div className="listing-features">
                     <span className="feature-item">{listing.bedrooms} beds</span>
                     <span className="feature-item">{listing.bathrooms} baths</span>

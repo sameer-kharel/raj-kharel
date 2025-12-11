@@ -222,7 +222,7 @@ const Footer = () => {
                 <li>
                   <a href="tel:+17031234567" className="footer-link contact-item" style={{ fontSize: '14px', fontWeight: '500' }}>
                     <Phone size={16} />
-                    <span>(571) 224-1254</span>
+                    <span>(571) - 224 - 1254</span>
                   </a>
                 </li>
                 <li>

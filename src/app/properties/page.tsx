@@ -522,12 +522,7 @@ export default function PropertiesPage() {
                 )}
               </div>
 
-              <Link href="/contact" className="contact-property-btn">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
-                </svg>
-                Schedule a Tour
-              </Link>
+
             </motion.div>
           </div>
         )}
@@ -584,6 +579,12 @@ export default function PropertiesPage() {
                   {property.representation && (
                     <div className="listing-representation">
                       {property.representation}
+                    </div>
+                  )}
+
+                  {property.description && (
+                    <div className="property-description" style={{ fontSize: '13px', marginBottom: '12px', lineHeight: '1.5' }}>
+                      {property.description}
                     </div>
                   )}
 

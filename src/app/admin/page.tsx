@@ -209,6 +209,10 @@ const styles = {
     transition: 'all 0.2s ease',
     marginLeft: '0.5rem',
   },
+  buttonEdit: {
+    background: '#dbeafe',
+    color: '#1e40af',
+  },
   buttonSold: {
     background: '#dcfce7',
     color: '#15803d',
@@ -684,6 +688,8 @@ const DashboardHomeTab = ({ listings, sold }: { listings: Listing[], sold: Listi
 );
 
 const ManageListingsTab = ({ listings, onRefresh }: { listings: Listing[], onRefresh: () => void }) => {
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
+
   const handleAction = async (id: string, action: 'sell' | 'delete') => {
     const confirmMessage = action === 'sell' ? 'Mark this property as sold?' : 'Permanently delete this listing?';
     if (!confirm(confirmMessage)) return;
@@ -700,6 +706,11 @@ const ManageListingsTab = ({ listings, onRefresh }: { listings: Listing[], onRef
       alert(`Failed to ${action} listing.`);
       console.error(error);
     }
+  };
+
+  const handleEditComplete = () => {
+    setEditingListing(null);
+    onRefresh();
   };
 
   return (
@@ -728,6 +739,7 @@ const ManageListingsTab = ({ listings, onRefresh }: { listings: Listing[], onRef
                 </td>
                 <td style={styles.td}><span style={{ fontWeight: '600', color: '#0f172a' }}>${listing.price.toLocaleString()}</span></td>
                 <td style={{ ...styles.td, textAlign: 'right' }}>
+                  <button onClick={() => setEditingListing(listing)} style={{ ...styles.actionButton, ...styles.buttonEdit }}>Edit</button>
                   <button onClick={() => handleAction(listing._id, 'sell')} style={{ ...styles.actionButton, ...styles.buttonSold }}>Mark Sold</button>
                   <button onClick={() => handleAction(listing._id, 'delete')} style={{ ...styles.actionButton, ...styles.buttonDelete }}>Delete</button>
                 </td>
@@ -737,11 +749,14 @@ const ManageListingsTab = ({ listings, onRefresh }: { listings: Listing[], onRef
         </table>
         {listings.length === 0 && <div style={styles.emptyState}>No active listings found</div>}
       </div>
+      {editingListing && <EditListingModal listing={editingListing} onClose={() => setEditingListing(null)} onSave={handleEditComplete} />}
     </Panel>
   );
 };
 
 const SoldPropertiesTab = ({ soldProperties, onRefresh }: { soldProperties: Listing[], onRefresh: () => void }) => {
+  const [editingProperty, setEditingProperty] = useState<Listing | null>(null);
+
   const handleDelete = async (id: string) => {
     if (!confirm('Permanently delete this sold property?')) return;
     try {
@@ -756,6 +771,11 @@ const SoldPropertiesTab = ({ soldProperties, onRefresh }: { soldProperties: List
       alert('Failed to delete sold property.');
       console.error(error);
     }
+  };
+
+  const handleEditComplete = () => {
+    setEditingProperty(null);
+    onRefresh();
   };
 
   return (
@@ -786,6 +806,7 @@ const SoldPropertiesTab = ({ soldProperties, onRefresh }: { soldProperties: List
                 <td style={styles.td}><span style={{ fontWeight: '600', color: '#0f172a' }}>${(prop.soldPrice || prop.price).toLocaleString()}</span></td>
                 <td style={styles.td}><span style={{ color: '#64748b' }}>{prop.soldDate ? new Date(prop.soldDate).toLocaleDateString() : 'N/A'}</span></td>
                 <td style={{ ...styles.td, textAlign: 'right' }}>
+                  <button onClick={() => setEditingProperty(prop)} style={{ ...styles.actionButton, ...styles.buttonEdit }}>Edit</button>
                   <button onClick={() => handleDelete(prop._id)} style={{ ...styles.actionButton, ...styles.buttonDelete }}>Delete</button>
                 </td>
               </tr>
@@ -794,7 +815,234 @@ const SoldPropertiesTab = ({ soldProperties, onRefresh }: { soldProperties: List
         </table>
         {soldProperties.length === 0 && <div style={styles.emptyState}>No sold properties found</div>}
       </div>
+      {editingProperty && <EditListingModal listing={editingProperty} onClose={() => setEditingProperty(null)} onSave={handleEditComplete} />}
     </Panel>
+  );
+};
+
+const EditListingModal = ({ listing, onClose, onSave }: { listing: Listing, onClose: () => void, onSave: () => void }) => {
+  const [formData, setFormData] = useState({
+    title: listing.title,
+    address: listing.address,
+    price: listing.price,
+    bedrooms: listing.bedrooms,
+    bathrooms: listing.bathrooms,
+    sqft: listing.sqft,
+    description: listing.description,
+    features: listing.features,
+    soldPrice: listing.soldPrice || 0,
+    soldDate: listing.soldDate ? new Date(listing.soldDate).toISOString().split('T')[0] : '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [featureInput, setFeatureInput] = useState('');
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: ['price', 'bedrooms', 'bathrooms', 'sqft', 'soldPrice'].includes(name) ? Number(value) : value }));
+  };
+
+  const handleAddFeature = () => {
+    if (featureInput.trim()) {
+      setFormData(prev => ({ ...prev, features: [...prev.features, featureInput.trim()] }));
+      setFeatureInput('');
+    }
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    setFormData(prev => ({ ...prev, features: prev.features.filter((_, i) => i !== index) }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const updateData: any = {
+        title: formData.title,
+        address: formData.address,
+        price: formData.price,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        sqft: formData.sqft,
+        description: formData.description,
+        features: formData.features,
+      };
+
+      // Include sold data if it's a sold property
+      if (listing.status === 'sold') {
+        if (formData.soldPrice > 0) updateData.soldPrice = formData.soldPrice;
+        if (formData.soldDate) updateData.soldDate = formData.soldDate;
+      }
+
+      const res = await fetch(`/api/admin/listings/${listing._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to update listing');
+      }
+
+      alert('Listing updated successfully!');
+      onSave();
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px',
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '16px',
+        maxWidth: '800px',
+        width: '100%',
+        maxHeight: '90vh',
+        overflow: 'auto',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+      }}>
+        <div style={{
+          padding: '1.5rem 2rem',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'sticky',
+          top: 0,
+          background: 'white',
+          zIndex: 1,
+        }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a' }}>Edit Listing</h3>
+          <button onClick={onClose} style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            color: '#64748b',
+            padding: '0',
+            width: '30px',
+            height: '30px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>×</button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
+          <div style={styles.formGrid}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Property Title</label>
+              <input name="title" value={formData.title} onChange={handleChange} style={styles.input} required />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Full Address</label>
+              <input name="address" value={formData.address} onChange={handleChange} style={styles.input} required />
+            </div>
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Description</label>
+            <textarea name="description" value={formData.description} onChange={handleChange} style={{ ...styles.input, ...styles.textarea }} required />
+          </div>
+
+          <div style={{ ...styles.formGrid, gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Price ($)</label>
+              <input name="price" type="number" value={formData.price} onChange={handleChange} style={styles.input} required />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Bedrooms</label>
+              <input name="bedrooms" type="number" value={formData.bedrooms} onChange={handleChange} style={styles.input} required />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Bathrooms</label>
+              <input name="bathrooms" type="number" value={formData.bathrooms} onChange={handleChange} style={styles.input} required />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Sq. Ft.</label>
+              <input name="sqft" type="number" value={formData.sqft} onChange={handleChange} style={styles.input} required />
+            </div>
+          </div>
+
+          {listing.status === 'sold' && (
+            <div style={{ ...styles.formGrid, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Sold Price ($)</label>
+                <input name="soldPrice" type="number" value={formData.soldPrice} onChange={handleChange} style={styles.input} />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Sold Date</label>
+                <input name="soldDate" type="date" value={formData.soldDate} onChange={handleChange} style={styles.input} />
+              </div>
+            </div>
+          )}
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Features</label>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <input
+                type="text"
+                value={featureInput}
+                onChange={(e) => setFeatureInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddFeature())}
+                placeholder="Add a feature (e.g., Pool, Garage)"
+                style={{ ...styles.input, flex: 1 }}
+              />
+              <button type="button" onClick={handleAddFeature} style={{ ...styles.actionButton, background: '#475569', color: '#fff', padding: '0.75rem 1.5rem' }}>
+                Add
+              </button>
+            </div>
+            {formData.features.length > 0 && (
+              <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {formData.features.map((feature, index) => (
+                  <span key={index} style={styles.featureTag}>
+                    {feature}
+                    <button type="button" onClick={() => handleRemoveFeature(index)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', lineHeight: 1 }}>
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ paddingTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={onClose} style={{
+              padding: '0.875rem 2rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: '#64748b',
+              background: '#f1f5f9',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+            }}>
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} style={{ ...styles.submitButton, opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 
