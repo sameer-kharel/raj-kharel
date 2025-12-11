@@ -19,6 +19,44 @@ interface Listing {
   soldDate?: string;
 }
 
+interface BlogPost {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  featuredImage: string;
+  category: 'Housing Update' | 'Local News' | 'Incentive' | 'Instagram Post';
+  instagramUrl?: string;
+  instagramEmbedCode?: string;
+  status: 'draft' | 'published';
+  publishedAt?: string;
+  author: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Subscriber {
+  _id: string;
+  email: string;
+  name?: string;
+  subscribedAt: string;
+  isActive: boolean;
+}
+
+interface Incentive {
+  _id: string;
+  title: string;
+  description: string;
+  type: 'charity' | 'discount' | 'bonus' | 'other';
+  amount?: number;
+  isActive: boolean;
+  startDate: string;
+  endDate?: string;
+  termsAndConditions: string;
+}
+
 interface Stats {
   activeListings: number;
   soldProperties: number;
@@ -590,6 +628,7 @@ export default function AdminDashboardPage() {
           <TabButton name="Overview" tabId="dashboard" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.dashboard} />
           <TabButton name="Manage Listings" tabId="manage" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.listings} />
           <TabButton name="Sold Properties" tabId="sold" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.sold} />
+          <TabButton name="Blog & Newsletter" tabId="blog" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.add} />
           <TabButton name="Add New Listing" tabId="add" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.add} />
         </div>
 
@@ -601,6 +640,7 @@ export default function AdminDashboardPage() {
               {activeTab === 'dashboard' && <DashboardHomeTab listings={listings} sold={soldProperties} />}
               {activeTab === 'manage' && <ManageListingsTab listings={listings} onRefresh={handleRefresh} />}
               {activeTab === 'sold' && <SoldPropertiesTab soldProperties={soldProperties} onRefresh={handleRefresh} />}
+              {activeTab === 'blog' && <BlogNewsletterTab />}
               {activeTab === 'add' && <AddListingTab onListingAdded={() => { handleRefresh(); setActiveTab('manage'); }} />}
             </>
           )}
@@ -1038,6 +1078,784 @@ const EditListingModal = ({ listing, onClose, onSave }: { listing: Listing, onCl
             </button>
             <button type="submit" disabled={isSubmitting} style={{ ...styles.submitButton, opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}>
               {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+
+
+const BlogNewsletterTab = () => {
+  const [activeSection, setActiveSection] = useState<'posts' | 'subscribers' | 'incentives'>('posts');
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [incentives, setIncentives] = useState<Incentive[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showBlogForm, setShowBlogForm] = useState(false);
+  const [showIncentiveForm, setShowIncentiveForm] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
+  const [editingIncentive, setEditingIncentive] = useState<Incentive | null>(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [postsRes, subsRes, incRes] = await Promise.all([
+        fetch('/api/admin/blog'),
+        fetch('/api/subscribers'),
+        fetch('/api/incentives?includeInactive=true'),
+      ]);
+
+      if (postsRes.ok) setBlogPosts(await postsRes.json());
+      if (subsRes.ok) {
+        const data = await subsRes.json();
+        setSubscribers(data.subscribers || []);
+      }
+      if (incRes.ok) setIncentives(await incRes.json());
+    } catch (error) {
+      console.error('Failed to fetch blog data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePost = async (id: string) => {
+    if (!confirm('Delete this blog post?')) return;
+    try {
+      const res = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        alert('Post deleted successfully');
+        fetchData();
+      }
+    } catch (error) {
+      alert('Failed to delete post');
+    }
+  };
+
+  const handleSendNewsletter = async (postId: string) => {
+    if (!confirm('Send this post as newsletter to all subscribers?')) return;
+    try {
+      const res = await fetch('/api/newsletter/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blogPostId: postId }),
+      });
+      const data = await res.json();
+      alert(data.message || 'Newsletter sent!');
+    } catch (error) {
+      alert('Failed to send newsletter');
+    }
+  };
+
+  const handleUnsubscribe = async (id: string) => {
+    if (!confirm('Unsubscribe this user?')) return;
+    try {
+      const res = await fetch(`/api/subscribers/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        alert('User unsubscribed');
+        fetchData();
+      }
+    } catch (error) {
+      alert('Failed to unsubscribe');
+    }
+  };
+
+  const handleDeleteIncentive = async (id: string) => {
+    if (!confirm('Delete this incentive?')) return;
+    try {
+      const res = await fetch(`/api/incentives/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        alert('Incentive deleted');
+        fetchData();
+      }
+    } catch (error) {
+      alert('Failed to delete incentive');
+    }
+  };
+
+  const handleToggleIncentive = async (id: string, isActive: boolean) => {
+    try {
+      const res = await fetch(`/api/incentives/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !isActive }),
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (error) {
+      alert('Failed to toggle incentive');
+    }
+  };
+
+  return (
+    <div>
+      {/* Section Tabs */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid #e2e8f0' }}>
+        <button
+          onClick={() => setActiveSection('posts')}
+          style={{
+            ...styles.tab,
+            ...(activeSection === 'posts' ? styles.tabActive : {}),
+          }}
+        >
+          Blog Posts ({blogPosts.length})
+        </button>
+        <button
+          onClick={() => setActiveSection('subscribers')}
+          style={{
+            ...styles.tab,
+            ...(activeSection === 'subscribers' ? styles.tabActive : {}),
+          }}
+        >
+          Subscribers ({subscribers.filter(s => s.isActive).length})
+        </button>
+        <button
+          onClick={() => setActiveSection('incentives')}
+          style={{
+            ...styles.tab,
+            ...(activeSection === 'incentives' ? styles.tabActive : {}),
+          }}
+        >
+          Incentives ({incentives.filter(i => i.isActive).length})
+        </button>
+      </div>
+
+      {loading ? (
+        <div style={styles.emptyState}>Loading...</div>
+      ) : (
+        <>
+          {/* Blog Posts Section */}
+          {activeSection === 'posts' && (
+            <Panel title="Blog Posts & Newsletter">
+              <div style={{ padding: '1.5rem 2rem' }}>
+                <button
+                  onClick={() => { setEditingBlog(null); setShowBlogForm(true); }}
+                  style={{ ...styles.submitButton, marginBottom: '1.5rem' }}
+                >
+                  Create New Post
+                </button>
+
+                {blogPosts.length === 0 ? (
+                  <div style={styles.emptyState}>No blog posts yet</div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={styles.table}>
+                      <thead style={styles.tableHead}>
+                        <tr>
+                          <th style={styles.th}>Title</th>
+                          <th style={styles.th}>Category</th>
+                          <th style={styles.th}>Status</th>
+                          <th style={styles.th}>Date</th>
+                          <th style={{ ...styles.th, textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {blogPosts.map((post) => (
+                          <tr key={post._id}>
+                            <td style={styles.td}>
+                              <div style={styles.propertyTitle}>{post.title}</div>
+                              <div style={styles.propertyAddress}>{post.excerpt.substring(0, 60)}...</div>
+                            </td>
+                            <td style={styles.td}>
+                              <span style={{ ...styles.featureTag, background: '#f1f5f9', color: '#475569' }}>
+                                {post.category}
+                              </span>
+                            </td>
+                            <td style={styles.td}>
+                              <span style={{
+                                ...styles.featureTag,
+                                background: post.status === 'published' ? '#dcfce7' : '#fee2e2',
+                                color: post.status === 'published' ? '#15803d' : '#dc2626',
+                              }}>
+                                {post.status}
+                              </span>
+                            </td>
+                            <td style={styles.td}>
+                              {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
+                            </td>
+                            <td style={{ ...styles.td, textAlign: 'right' }}>
+                              <button
+                                onClick={() => { setEditingBlog(post); setShowBlogForm(true); }}
+                                style={{ ...styles.actionButton, ...styles.buttonEdit }}
+                              >
+                                Edit
+                              </button>
+                              {post.status === 'published' && (
+                                <button
+                                  onClick={() => handleSendNewsletter(post._id)}
+                                  style={{ ...styles.actionButton, ...styles.buttonSold }}
+                                >
+                                  Send Newsletter
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeletePost(post._id)}
+                                style={{ ...styles.actionButton, ...styles.buttonDelete }}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </Panel>
+          )}
+
+          {/* Subscribers Section */}
+          {activeSection === 'subscribers' && (
+            <Panel title="Newsletter Subscribers">
+              <div style={{ padding: '1.5rem 2rem' }}>
+                <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#0f172a' }}>
+                    Total Active: {subscribers.filter(s => s.isActive).length}
+                  </div>
+                </div>
+
+                {subscribers.length === 0 ? (
+                  <div style={styles.emptyState}>No subscribers yet</div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={styles.table}>
+                      <thead style={styles.tableHead}>
+                        <tr>
+                          <th style={styles.th}>Email</th>
+                          <th style={styles.th}>Name</th>
+                          <th style={styles.th}>Subscribed</th>
+                          <th style={styles.th}>Status</th>
+                          <th style={{ ...styles.th, textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subscribers.map((sub) => (
+                          <tr key={sub._id}>
+                            <td style={styles.td}>{sub.email}</td>
+                            <td style={styles.td}>{sub.name || '-'}</td>
+                            <td style={styles.td}>
+                              {new Date(sub.subscribedAt).toLocaleDateString()}
+                            </td>
+                            <td style={styles.td}>
+                              <span style={{
+                                ...styles.featureTag,
+                                background: sub.isActive ? '#dcfce7' : '#fee2e2',
+                                color: sub.isActive ? '#15803d' : '#dc2626',
+                              }}>
+                                {sub.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                            <td style={{ ...styles.td, textAlign: 'right' }}>
+                              {sub.isActive && (
+                                <button
+                                  onClick={() => handleUnsubscribe(sub._id)}
+                                  style={{ ...styles.actionButton, ...styles.buttonDelete }}
+                                >
+                                  Unsubscribe
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </Panel>
+          )}
+
+          {/* Incentives Section */}
+          {activeSection === 'incentives' && (
+            <Panel title="Client Incentives & Promotions">
+              <div style={{ padding: '1.5rem 2rem' }}>
+                <button
+                  onClick={() => { setEditingIncentive(null); setShowIncentiveForm(true); }}
+                  style={{ ...styles.submitButton, marginBottom: '1.5rem' }}
+                >
+                  Create New Incentive
+                </button>
+
+                {incentives.length === 0 ? (
+                  <div style={styles.emptyState}>No incentives yet</div>
+                ) : (
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    {incentives.map((inc) => (
+                      <div
+                        key={inc._id}
+                        style={{
+                          background: '#f8fafc',
+                          padding: '1.5rem',
+                          borderRadius: '12px',
+                          border: `2px solid ${inc.isActive ? '#10b981' : '#e2e8f0'}`,
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.125rem', fontWeight: '700', color: '#0f172a' }}>
+                              {inc.title}
+                              {inc.amount && <span style={{ color: '#10b981', marginLeft: '0.5rem' }}>${inc.amount}</span>}
+                            </h4>
+                            <p style={{ margin: '0 0 1rem 0', color: '#64748b', lineHeight: '1.6' }}>
+                              {inc.description}
+                            </p>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <span style={{ ...styles.featureTag, background: '#dbeafe', color: '#1e40af' }}>
+                                {inc.type}
+                              </span>
+                              <span style={{
+                                ...styles.featureTag,
+                                background: inc.isActive ? '#dcfce7' : '#fee2e2',
+                                color: inc.isActive ? '#15803d' : '#dc2626',
+                              }}>
+                                {inc.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}>
+                            <button
+                              onClick={() => handleToggleIncentive(inc._id, inc.isActive)}
+                              style={{
+                                ...styles.actionButton,
+                                background: inc.isActive ? '#fee2e2' : '#dcfce7',
+                                color: inc.isActive ? '#dc2626' : '#15803d',
+                              }}
+                            >
+                              {inc.isActive ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button
+                              onClick={() => { setEditingIncentive(inc); setShowIncentiveForm(true); }}
+                              style={{ ...styles.actionButton, ...styles.buttonEdit }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteIncentive(inc._id)}
+                              style={{ ...styles.actionButton, ...styles.buttonDelete }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Panel>
+          )}
+        </>
+      )}
+
+      {/* Blog Form Modal */}
+      {showBlogForm && (
+        <BlogPostFormModal
+          post={editingBlog}
+          onClose={() => { setShowBlogForm(false); setEditingBlog(null); }}
+          onSave={() => { setShowBlogForm(false); setEditingBlog(null); fetchData(); }}
+        />
+      )}
+
+      {/* Incentive Form Modal */}
+      {showIncentiveForm && (
+        <IncentiveFormModal
+          incentive={editingIncentive}
+          onClose={() => { setShowIncentiveForm(false); setEditingIncentive(null); }}
+          onSave={() => { setShowIncentiveForm(false); setEditingIncentive(null); fetchData(); }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Simplified Blog Post Form Modal (you can enhance this with a rich text editor later)
+const BlogPostFormModal = ({ post, onClose, onSave }: { post: BlogPost | null, onClose: () => void, onSave: () => void }) => {
+  const [formData, setFormData] = useState({
+    title: post?.title || '',
+    content: post?.content || '',
+    excerpt: post?.excerpt || '',
+    featuredImage: post?.featuredImage || '',
+    category: post?.category || 'Housing Update',
+    instagramUrl: post?.instagramUrl || '',
+    status: post?.status || 'draft',
+    tags: post?.tags || [],
+  });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      let featuredImage = formData.featuredImage;
+
+      // Upload image if new file selected
+      if (imageFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('image', imageFile);
+        const imageRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: imageFormData,
+        });
+        const imageData = await imageRes.json();
+        if (!imageRes.ok) throw new Error('Failed to upload image');
+        featuredImage = imageData.url;
+      }
+
+      const url = post ? `/api/admin/blog/${post._id}` : '/api/admin/blog';
+      const method = post ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, featuredImage }),
+      });
+
+      if (!res.ok) throw new Error('Failed to save post');
+
+      alert(post ? 'Post updated!' : 'Post created!');
+      onSave();
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px',
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '16px',
+        maxWidth: '900px',
+        width: '100%',
+        maxHeight: '90vh',
+        overflow: 'auto',
+      }}>
+        <div style={{
+          padding: '1.5rem 2rem',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'sticky',
+          top: 0,
+          background: 'white',
+          zIndex: 1,
+        }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a' }}>
+            {post ? 'Edit Blog Post' : 'Create Blog Post'}
+          </h3>
+          <button onClick={onClose} style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            color: '#64748b',
+          }}>×</button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Title</label>
+            <input
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              style={styles.input}
+              required
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Excerpt (Short Summary)</label>
+            <textarea
+              value={formData.excerpt}
+              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+              style={{ ...styles.input, minHeight: '80px' }}
+              maxLength={300}
+              required
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Content</label>
+            <textarea
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              style={{ ...styles.input, minHeight: '200px' }}
+              required
+            />
+          </div>
+
+          <div style={{ ...styles.formGrid, gridTemplateColumns: 'repeat(2, 1fr)' }}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Category</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                style={styles.input}
+              >
+                <option value="Housing Update">Housing Update</option>
+                <option value="Local News">Local News</option>
+                <option value="Incentive">Incentive</option>
+                <option value="Instagram Post">Instagram Post</option>
+              </select>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                style={styles.input}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Featured Image</label>
+            <input
+              type="file"
+              onChange={(e) => e.target.files && setImageFile(e.target.files[0])}
+              accept="image/*"
+              style={{ ...styles.input, padding: '0.5rem' }}
+            />
+            {(formData.featuredImage || imageFile) && (
+              <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.5rem' }}>
+                {imageFile ? `Selected: ${imageFile.name}` : 'Current image will be kept'}
+              </p>
+            )}
+          </div>
+
+          {formData.category === 'Instagram Post' && (
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Instagram URL</label>
+              <input
+                value={formData.instagramUrl}
+                onChange={(e) => setFormData({ ...formData, instagramUrl: e.target.value })}
+                style={styles.input}
+                placeholder="https://www.instagram.com/p/..."
+              />
+            </div>
+          )}
+
+          <div style={{ paddingTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={onClose} style={{
+              padding: '0.875rem 2rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: '#64748b',
+              background: '#f1f5f9',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+            }}>
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} style={{
+              ...styles.submitButton,
+              opacity: isSubmitting ? 0.6 : 1,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            }}>
+              {isSubmitting ? 'Saving...' : (post ? 'Update Post' : 'Create Post')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Incentive Form Modal
+const IncentiveFormModal = ({ incentive, onClose, onSave }: { incentive: Incentive | null, onClose: () => void, onSave: () => void }) => {
+  const [formData, setFormData] = useState({
+    title: incentive?.title || '',
+    description: incentive?.description || '',
+    type: incentive?.type || 'charity',
+    amount: incentive?.amount || 0,
+    termsAndConditions: incentive?.termsAndConditions || '',
+    isActive: incentive?.isActive !== undefined ? incentive.isActive : true,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const url = incentive ? `/api/incentives/${incentive._id}` : '/api/incentives';
+      const method = incentive ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error('Failed to save incentive');
+
+      alert(incentive ? 'Incentive updated!' : 'Incentive created!');
+      onSave();
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px',
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '16px',
+        maxWidth: '600px',
+        width: '100%',
+        maxHeight: '90vh',
+        overflow: 'auto',
+      }}>
+        <div style={{
+          padding: '1.5rem 2rem',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a' }}>
+            {incentive ? 'Edit Incentive' : 'Create Incentive'}
+          </h3>
+          <button onClick={onClose} style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            color: '#64748b',
+          }}>×</button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Title</label>
+            <input
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              style={styles.input}
+              placeholder="e.g., $100 Charity Donation"
+              required
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Description</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              style={{ ...styles.input, minHeight: '100px' }}
+              required
+            />
+          </div>
+
+          <div style={{ ...styles.formGrid, gridTemplateColumns: 'repeat(2, 1fr)' }}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Type</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                style={styles.input}
+              >
+                <option value="charity">Charity Donation</option>
+                <option value="discount">Discount</option>
+                <option value="bonus">Bonus</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Amount ($)</label>
+              <input
+                type="number"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                style={styles.input}
+                min="0"
+              />
+            </div>
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Terms & Conditions</label>
+            <textarea
+              value={formData.termsAndConditions}
+              onChange={(e) => setFormData({ ...formData, termsAndConditions: e.target.value })}
+              style={{ ...styles.input, minHeight: '80px' }}
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              />
+              <span style={styles.label}>Active</span>
+            </label>
+          </div>
+
+          <div style={{ paddingTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={onClose} style={{
+              padding: '0.875rem 2rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: '#64748b',
+              background: '#f1f5f9',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+            }}>
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} style={{
+              ...styles.submitButton,
+              opacity: isSubmitting ? 0.6 : 1,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            }}>
+              {isSubmitting ? 'Saving...' : (incentive ? 'Update Incentive' : 'Create Incentive')}
             </button>
           </div>
         </form>
