@@ -1213,6 +1213,7 @@ const Contact = () => {
                           required
                         >
                           <option value="">Select time</option>
+                          <option value="08:00 AM">08:00 AM</option>
                           <option value="09:00 AM">09:00 AM</option>
                           <option value="10:00 AM">10:00 AM</option>
                           <option value="11:00 AM">11:00 AM</option>
@@ -1222,6 +1223,11 @@ const Contact = () => {
                           <option value="03:00 PM">03:00 PM</option>
                           <option value="04:00 PM">04:00 PM</option>
                           <option value="05:00 PM">05:00 PM</option>
+                          <option value="06:00 PM">06:00 PM</option>
+                          <option value="07:00 PM">07:00 PM</option>
+                          <option value="08:00 PM">08:00 PM</option>
+                          <option value="09:00 PM">09:00 PM</option>
+                          <option value="10:00 PM">10:00 PM</option>
                         </select>
                       </div>
                     </div>
