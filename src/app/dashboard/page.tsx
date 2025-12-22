@@ -165,6 +165,15 @@ export default function DashboardPage() {
     return (
         <div style={styles.container}>
             <div style={styles.wrapper}>
+                {/* Back Button */}
+                <Link href="/" style={styles.backButton}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Back to Home</span>
+                </Link>
+
                 {/* Header */}
                 <div style={styles.header}>
                     <div>
@@ -497,6 +506,22 @@ const styles: { [key: string]: React.CSSProperties } = {
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '2rem',
+    },
+    backButton: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.625rem 1.25rem',
+        background: '#ffffff',
+        color: '#1f2937',
+        borderRadius: '12px',
+        textDecoration: 'none',
+        fontSize: '0.9375rem',
+        fontWeight: '600',
+        marginBottom: '1.5rem',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+        border: '1px solid #e5e7eb',
+        transition: 'all 0.2s ease',
     },
     title: {
         fontSize: '2rem',

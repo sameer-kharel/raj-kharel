@@ -6,8 +6,7 @@ import Header from './Header';
 export default function ConditionalHeader() {
     const pathname = usePathname();
 
-    // Don't render header on admin pages
-    if (pathname?.startsWith('/admin')) {
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/dashboard')) {
         return null;
     }
     if (pathname?.startsWith('/calculators')) {
