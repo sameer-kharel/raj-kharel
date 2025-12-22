@@ -40,13 +40,16 @@ interface DocumentSubmission {
 }
 
 interface Checklist {
+    _id: string;
+    type: 'buying' | 'selling' | 'general';
     tourCompleted: boolean;
     documentsSubmitted: boolean;
     documentsVerified: boolean;
     advancePaymentMade: boolean;
     offerMade: boolean;
     offerAccepted: boolean;
-    customItems?: Array<{ label: string; completed: boolean }>;
+    customItems?: Array<{ label: string; status: 'pending' | 'started' | 'completed' }>;
+    isIssued: boolean;
 }
 
 export default function DashboardPage() {
@@ -81,7 +84,9 @@ export default function DashboardPage() {
                 const conversations = convData.conversations || [];
                 setConversations(conversations);
 
-                // Fetch checklist for the first conversation's listing (Buying) - only if issued
+                let checklistFound = false;
+
+                // 1. Try fetching checklist for the first conversation's listing (Buying)
                 if (conversations.length > 0 && conversations[0].listing) {
                     const listingId = conversations[0].listing._id;
                     setSelectedListing(listingId);
@@ -89,19 +94,29 @@ export default function DashboardPage() {
                     const checkRes = await fetch(`/api/checklists?listingId=${listingId}`);
                     if (checkRes.ok) {
                         const checkData = await checkRes.json();
-                        // Only set checklist if it's issued
                         if (checkData.checklist && checkData.checklist.isIssued) {
                             setChecklist(checkData.checklist);
+                            checklistFound = true;
                         }
                     }
                 }
 
-                // Fetch Selling Checklist explicitly - only if issued
+                // 2. If no listing-specific checklist found, try fetching "general" buying/general checklist
+                if (!checklistFound) {
+                    const genRes = await fetch('/api/checklists?type=general');
+                    if (genRes.ok) {
+                        const genData = await genRes.json();
+                        if (genData.checklist && genData.checklist.isIssued) {
+                            setChecklist(genData.checklist);
+                        }
+                    }
+                }
+
+                // 3. Fetch Selling Checklist explicitly - only if issued
                 const sellingRes = await fetch('/api/checklists?type=selling');
                 if (sellingRes.ok) {
                     const sellingData = await sellingRes.json();
-                    // Only set if issued and has items
-                    if (sellingData.checklist && sellingData.checklist.isIssued && sellingData.checklist.customItems.length > 0) {
+                    if (sellingData.checklist && sellingData.checklist.isIssued && (sellingData.checklist.customItems?.length > 0 || sellingData.checklist.isIssued)) {
                         setSellingChecklist(sellingData.checklist);
                     }
                 }
@@ -140,14 +155,14 @@ export default function DashboardPage() {
     const getProgressPercentage = () => {
         if (!checklist && !sellingChecklist) return 0;
 
-        // Use selling checklist if available, otherwise buying
         const targetChecklist = sellingChecklist || checklist;
         if (!targetChecklist) return 0;
 
         if (targetChecklist.customItems && targetChecklist.customItems.length > 0) {
             const total = targetChecklist.customItems.length;
-            const completed = targetChecklist.customItems.filter((i: any) => i.completed).length;
-            return Math.round((completed / total) * 100);
+            const completed = targetChecklist.customItems.filter((i: any) => i.status === 'completed').length;
+            const started = targetChecklist.customItems.filter((i: any) => i.status === 'started').length;
+            return Math.round(((completed + (started * 0.5)) / total) * 100);
         }
 
         const items = [
@@ -343,7 +358,10 @@ export default function DashboardPage() {
                     {/* Progress Checklist (Selling or Buying) */}
                     <div style={styles.panel}>
                         <div style={styles.panelHeader}>
-                            <h2 style={styles.panelTitle}>{sellingChecklist ? 'Selling Your Home' : 'Home Buying Progress'}</h2>
+                            <h2 style={styles.panelTitle}>
+                                {sellingChecklist ? 'Selling Your Home' :
+                                    (checklist?.type === 'general' ? 'My Progress' : 'Home Buying Progress')}
+                            </h2>
                             <span style={styles.progressBadge}>{getProgressPercentage()}% Complete</span>
                         </div>
                         <div style={styles.panelContent}>
@@ -351,67 +369,95 @@ export default function DashboardPage() {
                                 <div style={styles.checklistContainer}>
                                     {sellingChecklist.customItems?.map((item: any, index: number) => (
                                         <div key={index} style={styles.checklistItem}>
-                                            <div style={item.completed ? styles.checkboxChecked : styles.checkboxUnchecked}>
-                                                {item.completed && (
+                                            <div style={item.status === 'completed' ? styles.checkboxChecked : styles.checkboxUnchecked}>
+                                                {item.status === 'completed' && (
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
                                                         <polyline points="20 6 9 17 4 12" />
                                                     </svg>
                                                 )}
+                                                {item.status === 'started' && !item.completed && (
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff' }} />
+                                                )}
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <p style={styles.checklistLabel}>{item.label}</p>
+                                                {item.status === 'started' && <p style={{ ...styles.checklistDesc, color: '#2563eb' }}>In Progress</p>}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : checklist ? (
                                 <div style={styles.checklistContainer}>
-                                    <div style={styles.checklistItem}>
-                                        <div style={checklist.tourCompleted ? styles.checkboxChecked : styles.checkboxUnchecked}>
-                                            {checklist.tourCompleted && (
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <p style={styles.checklistLabel}>Property Tour Completed</p>
-                                            <p style={styles.checklistDesc}>Schedule and complete a property viewing</p>
-                                        </div>
-                                    </div>
+                                    {/* If it's a general checklist with custom items, show them */}
+                                    {checklist.customItems && checklist.customItems.length > 0 ? (
+                                        checklist.customItems.map((item: any, index: number) => (
+                                            <div key={index} style={styles.checklistItem}>
+                                                <div style={item.status === 'completed' ? styles.checkboxChecked : styles.checkboxUnchecked}>
+                                                    {item.status === 'completed' && (
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                                            <polyline points="20 6 9 17 4 12" />
+                                                        </svg>
+                                                    )}
+                                                    {item.status === 'started' && (
+                                                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6' }} />
+                                                    )}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={styles.checklistLabel}>{item.label}</p>
+                                                    {item.status === 'started' && <p style={{ ...styles.checklistDesc, color: '#2563eb' }}>In Progress</p>}
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <>
+                                            <div style={styles.checklistItem}>
+                                                <div style={checklist.tourCompleted ? styles.checkboxChecked : styles.checkboxUnchecked}>
+                                                    {checklist.tourCompleted && (
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                                            <polyline points="20 6 9 17 4 12" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={styles.checklistLabel}>Property Tour Completed</p>
+                                                    <p style={styles.checklistDesc}>Schedule and complete a property viewing</p>
+                                                </div>
+                                            </div>
 
-                                    <div style={styles.checklistItem}>
-                                        <div style={checklist.documentsSubmitted ? styles.checkboxChecked : styles.checkboxUnchecked}>
-                                            {checklist.documentsSubmitted && (
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <p style={styles.checklistLabel}>Documents Submitted</p>
-                                            <p style={styles.checklistDesc}>Upload required documents for verification</p>
-                                        </div>
-                                    </div>
+                                            <div style={styles.checklistItem}>
+                                                <div style={checklist.documentsSubmitted ? styles.checkboxChecked : styles.checkboxUnchecked}>
+                                                    {checklist.documentsSubmitted && (
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                                            <polyline points="20 6 9 17 4 12" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={styles.checklistLabel}>Documents Submitted</p>
+                                                    <p style={styles.checklistDesc}>Upload required documents for verification</p>
+                                                </div>
+                                            </div>
 
-                                    <div style={styles.checklistItem}>
-                                        <div style={checklist.documentsVerified ? styles.checkboxChecked : styles.checkboxUnchecked}>
-                                            {checklist.documentsVerified && (
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <p style={styles.checklistLabel}>Documents Verified</p>
-                                            <p style={styles.checklistDesc}>Waiting for admin to verify your documents</p>
-                                        </div>
-                                    </div>
+                                            <div style={styles.checklistItem}>
+                                                <div style={checklist.documentsVerified ? styles.checkboxChecked : styles.checkboxUnchecked}>
+                                                    {checklist.documentsVerified && (
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                                            <polyline points="20 6 9 17 4 12" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={styles.checklistLabel}>Documents Verified</p>
+                                                    <p style={styles.checklistDesc}>Waiting for admin to verify your documents</p>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ) : (
                                 <div style={styles.emptyState}>
                                     <p>No checklist issued yet</p>
-                                    <p style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: '#9ca3af' }}>
+                                    <p style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: '#000000' }}>
                                         Your agent will create a personalized checklist for you
                                     </p>
                                 </div>
