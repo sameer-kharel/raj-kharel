@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 
 interface Document {
@@ -159,15 +160,15 @@ export default function DocumentsPage() {
         <div style={styles.container}>
             <div style={styles.wrapper}>
                 {/* Back Button */}
-                <button
-                    onClick={() => router.push('/dashboard')}
+                <Link
+                    href="/dashboard"
                     style={styles.backToDashboard}
                 >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M19 12H5M12 19l-7-7 7-7" />
                     </svg>
                     <span>Back to Dashboard</span>
-                </button>
+                </Link>
 
                 <div style={styles.topSection}>
                     <div>

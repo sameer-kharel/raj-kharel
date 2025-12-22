@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 
 interface Message {
@@ -29,7 +30,6 @@ export default function ChatPage() {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
-    const [isOnline, setIsOnline] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -75,19 +75,6 @@ export default function ChatPage() {
         }
     }, [conversationId]);
 
-    // Check online status
-    useEffect(() => {
-        const handleOnline = () => setIsOnline(true);
-        const handleOffline = () => setIsOnline(false);
-
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
 
     const initializeDirectConversation = async () => {
         try {
@@ -191,15 +178,15 @@ export default function ChatPage() {
             <div style={styles.chatContainer}>
                 {/* Chat Header */}
                 <div style={styles.header}>
-                    <button
-                        onClick={() => router.push('/dashboard')}
+                    <Link
+                        href="/dashboard"
                         style={styles.backButton}
                         title="Back to Dashboard"
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
-                    </button>
+                    </Link>
                     <div style={styles.headerInfo}>
                         <div style={styles.adminAvatar}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -208,16 +195,7 @@ export default function ChatPage() {
                             </svg>
                         </div>
                         <div style={{ flex: 1 }}>
-                            <h3 style={styles.headerTitle}>Admin Support</h3>
-                            <div style={styles.headerSubtitley}>
-                                <div style={{
-                                    ...styles.statusDot,
-                                    background: isOnline ? '#10b981' : '#94a3b8'
-                                }} />
-                                <p style={styles.headerSubtitle}>
-                                    {isOnline ? 'Online • Usually responds within minutes' : 'You are offline'}
-                                </p>
-                            </div>
+                            <h3 style={styles.headerTitle}>Agent Support</h3>
                         </div>
                     </div>
                 </div>
@@ -234,7 +212,7 @@ export default function ChatPage() {
                             </div>
                             <h3 style={styles.welcomeTitle}>Hi {session.user?.name?.split(' ')[0]}! 👋</h3>
                             <p style={styles.welcomeText}>
-                                Welcome to direct messaging with our admin team. We're here to help you find your perfect home!
+                                Welcome to direct messaging with our agent team. We're here to help you find your perfect home!
                             </p>
                             <p style={styles.welcomeSubtext}>
                                 Start a conversation by sending a message below. We'll respond as soon as possible.
@@ -271,7 +249,7 @@ export default function ChatPage() {
                                                     fontWeight: '600',
                                                     color: '#64748b',
                                                 }}>
-                                                    {isClient ? 'You' : 'Admin Support'}
+                                                    {isClient ? 'You' : 'Agent Support'}
                                                 </span>
                                             </div>
                                         )}
@@ -551,20 +529,9 @@ const styles: { [key: string]: React.CSSProperties } = {
         color: '#050505',
         marginBottom: '0.25rem',
     },
-    headerSubtitley: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-    },
     headerSubtitle: {
         fontSize: '0.8125rem',
         color: '#65676b',
-    },
-    statusDot: {
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        flexShrink: 0,
     },
     messagesArea: {
         flex: 1,

@@ -1,6 +1,4 @@
-// Socket.io for Next.js 13+ App Router
 // This file provides Socket.io connection utilities
-
 import { io, Socket } from 'socket.io-client';
 
 let socket: Socket | null = null;
@@ -11,7 +9,7 @@ export const getSocket = (): Socket => {
             path: '/api/socketio',
             addTrailingSlash: false,
         });
-    }
+    }   
     return socket;
 };
 
