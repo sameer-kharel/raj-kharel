@@ -91,31 +91,55 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Create uploads directory if it doesn't exist
-        const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'documents');
-        try {
-            await mkdir(uploadsDir, { recursive: true });
-        } catch (error) {
-            // Directory might already exist
+        // Determine if it's an image for ImgBB, otherwise use local storage
+        let fileUrl = '';
+        const isImage = file.type.startsWith('image/');
+
+        if (isImage && process.env.IMGBB_API_KEY) {
+            try {
+                const imageBuffer = await file.arrayBuffer();
+                const imageBase64 = Buffer.from(imageBuffer).toString('base64');
+                const imgbbFormData = new FormData();
+                imgbbFormData.append('image', imageBase64);
+
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, {
+                    method: 'POST',
+                    body: imgbbFormData,
+                });
+
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    fileUrl = result.data.url;
+                }
+            } catch (error) {
+                console.error('ImgBB upload failed, falling back to local:', error);
+            }
         }
 
-        // Generate unique filename
-        const timestamp = Date.now();
-        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const fileName = `${timestamp}_${sanitizedFileName}`;
-        const filePath = path.join(uploadsDir, fileName);
+        // Fallback to local storage if not an image or ImgBB failed
+        if (!fileUrl) {
+            const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'documents');
+            try {
+                await mkdir(uploadsDir, { recursive: true });
+            } catch (error) { }
 
-        // Save file
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        await writeFile(filePath, buffer);
+            const timestamp = Date.now();
+            const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const fileName = `${timestamp}_${sanitizedFileName}`;
+            const filePath = path.join(uploadsDir, fileName);
+
+            const bytes = await file.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+            await writeFile(filePath, buffer);
+            fileUrl = `/uploads/documents/${fileName}`;
+        }
 
         // Create document submission
         const documentData: any = {
             client: user._id,
             documentType,
             fileName: file.name,
-            fileUrl: `/uploads/documents/${fileName}`,
+            fileUrl,
             fileSize: file.size,
             status: 'pending',
             notes,

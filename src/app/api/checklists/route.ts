@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
         const { searchParams } = new URL(request.url);
         const listingId = searchParams.get('listingId');
-        const type = searchParams.get('type') || 'buying';
+        const type = searchParams.get('type') || 'general';
 
         let checklist;
 
@@ -58,27 +58,7 @@ export async function GET(request: NextRequest) {
                 .populate('issuedBy', 'name');
         }
 
-        // If no checklist exists and it's a selling checklist request, create the default one
-        if (!checklist && type === 'selling' && !listingId) {
-            const defaultSellingItems = [
-                { label: "Determine Property Value", completed: false },
-                { label: "Clean and Declutter", completed: false },
-                { label: "Make Necessary Repairs", completed: false },
-                { label: "Stage the Home", completed: false },
-                { label: "Professional Photography", completed: false },
-                { label: "List the Property", completed: false },
-                { label: "Market the Property", completed: false },
-                { label: "Schedule Showings", completed: false },
-                { label: "Review Offers", completed: false },
-                { label: "Close the Sale", completed: false }
-            ];
 
-            checklist = await Checklist.create({
-                client: user.role === 'admin' ? searchParams.get('clientId') : user._id,
-                type: 'selling',
-                customItems: defaultSellingItems
-            });
-        }
 
         if (!checklist) {
             // Return default checklist structure if none exists (for transient UI)

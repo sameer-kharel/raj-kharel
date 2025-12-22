@@ -10,6 +10,7 @@ interface User {
     name?: string;
     image?: string;
     role: 'client' | 'admin';
+    createdAt?: string;
 }
 
 interface DocumentSubmission {
@@ -353,7 +354,7 @@ export const DocumentsTab = () => {
                             <table style={styles.table}>
                                 <thead style={styles.tableHead}>
                                     <tr>
-                                        <th style={styles.th}>Client</th>
+                                        {groupBy !== 'client' && <th style={styles.th}>Client</th>}
                                         <th style={styles.th}>Document Type</th>
                                         <th style={styles.th}>Property</th>
                                         <th style={styles.th}>File</th>
@@ -364,12 +365,29 @@ export const DocumentsTab = () => {
                                 <tbody>
                                     {docs.map((doc) => (
                                         <tr key={doc._id}>
+                                            {groupBy !== 'client' && (
+                                                <td style={styles.td}>
+                                                    <div style={{ fontWeight: '600', color: '#0f172a' }}>{doc.client.name || 'N/A'}</div>
+                                                    <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{doc.client.email}</div>
+                                                </td>
+                                            )}
                                             <td style={styles.td}>
-                                                <div style={{ fontWeight: '600', color: '#0f172a' }}>{doc.client.name || 'N/A'}</div>
-                                                <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{doc.client.email}</div>
+                                                <span style={{
+                                                    padding: '0.25rem 0.5rem',
+                                                    background: '#f1f5f9',
+                                                    borderRadius: '4px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '700',
+                                                    color: '#475569',
+                                                    textTransform: 'uppercase'
+                                                }}>
+                                                    {doc.documentType.replace('_', ' ')}
+                                                </span>
                                             </td>
-                                            <td style={styles.td}>{doc.documentType.replace('_', ' ').toUpperCase()}</td>
-                                            <td style={styles.td}>{doc.listing?.title || 'General'}</td>
+                                            <td style={styles.td}>
+                                                <div style={{ fontWeight: '600', color: '#0f172a' }}>{doc.listing?.title || 'General'}</div>
+                                                {doc.listing?.address && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{doc.listing.address}</div>}
+                                            </td>
                                             <td style={styles.td}>
                                                 <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
                                                     {doc.fileName}
@@ -414,7 +432,6 @@ export const ChecklistsTab = () => {
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [selectedClient, setSelectedClient] = useState('');
-    const [checklistType, setChecklistType] = useState<'buying' | 'selling' | 'general'>('general');
     const [customItems, setCustomItems] = useState<Array<{ label: string; completed: boolean }>>([]);
     const [newItemLabel, setNewItemLabel] = useState('');
 
@@ -466,7 +483,7 @@ export const ChecklistsTab = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     clientId: selectedClient,
-                    type: checklistType,
+                    type: 'general',
                     customItems,
                     issueNow,
                 }),
@@ -549,14 +566,7 @@ export const ChecklistsTab = () => {
                             </select>
                         </div>
 
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={styles.label}>Checklist Type</label>
-                            <select value={checklistType} onChange={(e) => setChecklistType(e.target.value as any)} style={styles.input}>
-                                <option value="general">General</option>
-                                <option value="buying">Buying</option>
-                                <option value="selling">Selling</option>
-                            </select>
-                        </div>
+
 
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={styles.label}>Checklist Items</label>
@@ -1184,12 +1194,86 @@ export const ConversationsTab = () => {
     );
 };
 
-// Placeholder tabs
-export const ClientsTab = () => (
-    <Panel title="Clients">
-        <div style={styles.emptyState}>Client management coming soon</div>
-    </Panel>
-);
+// Clients Tab Component
+export const ClientsTab = () => {
+    const [clients, setClients] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchClients();
+    }, []);
+
+    const fetchClients = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/users');
+            if (res.ok) {
+                const data = await res.json();
+                // Filter to show only clients
+                setClients(data.users?.filter((u: User) => u.role === 'client') || []);
+            }
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+        }
+        setLoading(false);
+    };
+
+    if (loading) return <div style={styles.emptyState}>Loading clients...</div>;
+
+    return (
+        <Panel title="Registered Clients">
+            <div style={{ overflowX: 'auto' }}>
+                <table style={styles.table}>
+                    <thead style={styles.tableHead}>
+                        <tr>
+                            <th style={styles.th}>Client Name</th>
+                            <th style={styles.th}>Email Address</th>
+                            <th style={styles.th}>Member Since</th>
+                            <th style={styles.th}>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {clients.map((client) => (
+                            <tr key={client._id}>
+                                <td style={styles.td}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        {client.image && (
+                                            <Image
+                                                src={client.image}
+                                                alt={client.name || ''}
+                                                width={32}
+                                                height={32}
+                                                style={{ borderRadius: '50%' }}
+                                            />
+                                        )}
+                                        <div style={{ fontWeight: '600', color: '#0f172a' }}>{client.name || 'Anonymous'}</div>
+                                    </div>
+                                </td>
+                                <td style={styles.td}>{client.email}</td>
+                                <td style={styles.td}>
+                                    {client.createdAt ? new Date(client.createdAt).toLocaleDateString() : 'N/A'}
+                                </td>
+                                <td style={styles.td}>
+                                    <span style={{
+                                        padding: '0.25rem 0.75rem',
+                                        borderRadius: '9999px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '600',
+                                        background: '#dcfce7',
+                                        color: '#166534'
+                                    }}>
+                                        Active
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                {clients.length === 0 && <div style={styles.emptyState}>No clients registered yet</div>}
+            </div>
+        </Panel>
+    );
+};
 
 // Tour Bookings Tab Component
 export const TourBookingsTab = () => {

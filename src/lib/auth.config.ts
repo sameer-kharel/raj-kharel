@@ -77,6 +77,7 @@ export const authOptions: NextAuthOptions = {
                 if (dbUser) {
                     session.user.id = dbUser._id.toString();
                     session.user.role = dbUser.role;
+                    session.user.createdAt = dbUser.createdAt;
                 }
             }
             return session;

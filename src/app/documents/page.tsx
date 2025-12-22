@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface Document {
     _id: string;
@@ -37,6 +38,7 @@ export default function DocumentsPage() {
     const [documentType, setDocumentType] = useState('');
     const [notes, setNotes] = useState('');
     const [file, setFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
@@ -71,15 +73,30 @@ export default function DocumentsPage() {
         }
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0] || null;
+        setFile(selectedFile);
+
+        if (selectedFile && selectedFile.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFilePreview(reader.result as string);
+            };
+            reader.readAsDataURL(selectedFile);
+        } else {
+            setFilePreview(null);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file || !selectedListing || !documentType) return;
+        if (!file || !documentType) return;
 
         setUploading(true);
         try {
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('listingId', selectedListing);
+            if (selectedListing) formData.append('listingId', selectedListing);
             formData.append('documentType', documentType);
             formData.append('notes', notes);
 
@@ -93,6 +110,7 @@ export default function DocumentsPage() {
                 setDocuments([data.document, ...documents]);
                 setShowUploadForm(false);
                 setFile(null);
+                setFilePreview(null);
                 setSelectedListing('');
                 setDocumentType('');
                 setNotes('');
@@ -140,40 +158,34 @@ export default function DocumentsPage() {
     return (
         <div style={styles.container}>
             <div style={styles.wrapper}>
-                <div style={styles.header}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <button
-                            onClick={() => router.push('/dashboard')}
-                            style={{
-                                width: '40px',
-                                height: '40px',
-                                padding: '0',
-                                background: 'transparent',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#64748b',
-                                transition: 'all 0.2s',
-                            }}
-                            title="Back to Dashboard"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M19 12H5M12 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <div>
-                            <h1 style={styles.title}>Documents</h1>
-                            <p style={styles.subtitle}>Upload and manage your documents</p>
-                        </div>
+                {/* Back Button */}
+                <button
+                    onClick={() => router.push('/dashboard')}
+                    style={styles.backToDashboard}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    <span>Back to Dashboard</span>
+                </button>
+
+                <div style={styles.topSection}>
+                    <div>
+                        <h1 style={styles.title}>Documents</h1>
+                        <p style={styles.subtitle}>Upload and manage your real estate documents</p>
                     </div>
                     <button
                         onClick={() => setShowUploadForm(!showUploadForm)}
-                        style={styles.uploadButton}
+                        style={styles.uploadButtonPremium}
                     >
-                        {showUploadForm ? 'Cancel' : '+ Upload Document'}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            {showUploadForm ? (
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            ) : (
+                                <path d="M12 5v14M5 12h14" />
+                            )}
+                        </svg>
+                        <span>{showUploadForm ? 'Cancel Upload' : 'Upload New'}</span>
                     </button>
                 </div>
 
@@ -218,11 +230,16 @@ export default function DocumentsPage() {
                                 <label style={styles.label}>File</label>
                                 <input
                                     type="file"
-                                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                    onChange={handleFileChange}
                                     style={styles.fileInput}
                                     required
                                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                 />
+                                {filePreview && (
+                                    <div style={{ marginTop: '1rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                                        <img src={filePreview} alt="Preview" style={{ maxWidth: '100%', display: 'block' }} />
+                                    </div>
+                                )}
                                 <p style={styles.fileHint}>
                                     Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 10MB)
                                 </p>
@@ -273,10 +290,21 @@ export default function DocumentsPage() {
                             <div key={doc._id} style={styles.documentCard}>
                                 <div style={styles.documentHeader}>
                                     <div style={styles.documentIcon}>
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                            <polyline points="14 2 14 8 20 8" />
-                                        </svg>
+                                        {doc.fileUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
+                                            <div style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
+                                                <Image
+                                                    src={doc.fileUrl}
+                                                    alt={doc.fileName}
+                                                    fill
+                                                    style={{ objectFit: 'cover' }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                <polyline points="14 2 14 8 20 8" />
+                                            </svg>
+                                        )}
                                     </div>
                                     <div style={{ ...styles.statusBadge, ...getStatusStyle(doc.status) }}>
                                         {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
@@ -365,31 +393,44 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontSize: '1rem',
         color: '#6b7280',
     },
-    header: {
+    backToDashboard: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        padding: '0.875rem 1.5rem',
+        background: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        borderRadius: '16px',
+        color: '#1e293b',
+        textDecoration: 'none',
+        fontSize: '0.9375rem',
+        fontWeight: '700',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)',
+        marginBottom: '2rem',
+        cursor: 'pointer',
+    },
+    topSection: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '2rem',
+        marginBottom: '3rem',
     },
-    title: {
-        fontSize: '2rem',
-        fontWeight: '700',
-        color: '#1f2937',
-        marginBottom: '0.25rem',
-    },
-    subtitle: {
-        fontSize: '1rem',
-        color: '#6b7280',
-    },
-    uploadButton: {
-        padding: '0.75rem 1.5rem',
-        background: '#2563eb',
+    uploadButtonPremium: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        padding: '1rem 2rem',
+        background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
         color: '#ffffff',
         border: 'none',
-        borderRadius: '8px',
-        fontSize: '0.9375rem',
-        fontWeight: '600',
+        borderRadius: '16px',
+        fontSize: '1rem',
+        fontWeight: '700',
         cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        boxShadow: '0 8px 20px rgba(37, 99, 235, 0.25)',
     },
     formCard: {
         background: '#ffffff',

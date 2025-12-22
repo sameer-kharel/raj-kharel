@@ -32,7 +32,7 @@ export interface IChecklist extends Document {
 const ChecklistSchema: Schema = new Schema({
     client: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     listing: { type: Schema.Types.ObjectId, ref: 'Listing', required: false },
-    type: { type: String, enum: ['buying', 'selling', 'general'], default: 'buying' },
+    type: { type: String, default: 'general' },
     tourCompleted: { type: Boolean, default: false },
     tourCompletedAt: { type: Date },
     documentsSubmitted: { type: Boolean, default: false },
