@@ -105,23 +105,36 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const { clientId, listingId, type, customItems, notes, issueNow } = await request.json();
+        const { clientId, listingId, type, customItems, notes, issueNow, userName, userPhone } = await request.json();
 
-        if (!clientId) {
-            return NextResponse.json(
-                { error: 'Client ID is required' },
-                { status: 400 }
-            );
+        let targetClientId = clientId;
+
+        if (!targetClientId) {
+            if (userName && userPhone) {
+                // Create a placeholder user
+                const placeholderUser = await User.create({
+                    name: userName,
+                    phone: userPhone,
+                    role: 'client',
+                    isPlaceholder: true,
+                });
+                targetClientId = placeholderUser._id;
+            } else {
+                return NextResponse.json(
+                    { error: 'Client ID or Name/Phone is required' },
+                    { status: 400 }
+                );
+            }
         }
 
         // Verify client exists
-        const client = await User.findById(clientId);
+        const client = await User.findById(targetClientId);
         if (!client) {
             return NextResponse.json({ error: 'Client not found' }, { status: 404 });
         }
 
         const checklistData: any = {
-            client: clientId,
+            client: targetClientId,
             type: type || 'general',
             customItems: customItems || [],
             notes,
@@ -262,6 +275,44 @@ export async function PATCH(request: NextRequest) {
         console.error('Error updating checklist:', error);
         return NextResponse.json(
             { error: 'Failed to update checklist' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session || !session.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        await dbConnect();
+
+        const user = await User.findOne({ email: session.user.email });
+        if (!user || user.role !== 'admin') {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        const { searchParams } = new URL(request.url);
+        const checklistId = searchParams.get('checklistId');
+
+        if (!checklistId) {
+            return NextResponse.json({ error: 'Checklist ID is required' }, { status: 400 });
+        }
+
+        const deletedChecklist = await Checklist.findByIdAndDelete(checklistId);
+
+        if (!deletedChecklist) {
+            return NextResponse.json({ error: 'Checklist not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: 'Checklist deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting checklist:', error);
+        return NextResponse.json(
+            { error: 'Failed to delete checklist' },
             { status: 500 }
         );
     }

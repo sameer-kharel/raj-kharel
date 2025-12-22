@@ -2,8 +2,8 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IChecklistItem {
     label: string;
-    completed: boolean;
-    completedAt?: Date;
+    status: 'pending' | 'started' | 'completed';
+    updatedAt?: Date;
 }
 
 export interface IChecklist extends Document {
@@ -47,8 +47,12 @@ const ChecklistSchema: Schema = new Schema({
     offerAcceptedAt: { type: Date },
     customItems: [{
         label: { type: String, required: true },
-        completed: { type: Boolean, default: false },
-        completedAt: { type: Date },
+        status: {
+            type: String,
+            enum: ['pending', 'started', 'completed'],
+            default: 'pending'
+        },
+        updatedAt: { type: Date, default: Date.now },
     }],
     notes: { type: String },
     isIssued: { type: Boolean, default: false },

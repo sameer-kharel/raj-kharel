@@ -29,6 +29,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         // Initialize socket connection
         const socketInstance = io({
             path: '/api/socket',
+            addTrailingSlash: false,
         });
 
         socketInstance.on('connect', () => {

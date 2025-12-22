@@ -417,6 +417,16 @@ const styles: { [key: string]: React.CSSProperties } = {
         alignItems: 'center',
         marginBottom: '3rem',
     },
+    title: {
+        fontSize: '2.5rem',
+        fontWeight: '800',
+        color: '#000000',
+        marginBottom: '0.5rem',
+    },
+    subtitle: {
+        fontSize: '1.125rem',
+        color: '#000000',
+    },
     uploadButtonPremium: {
         display: 'inline-flex',
         alignItems: 'center',

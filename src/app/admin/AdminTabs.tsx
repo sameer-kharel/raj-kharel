@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import Image from 'next/image';
 
 // Type definitions
 interface User {
     _id: string;
     email: string;
+    phone?: string;
     name?: string;
     image?: string;
     role: 'client' | 'admin';
+    isPlaceholder?: boolean;
     createdAt?: string;
 }
 
@@ -44,7 +46,7 @@ interface Checklist {
     documentsVerified: boolean;
     offerMade: boolean;
     offerAccepted: boolean;
-    customItems: Array<{ label: string; completed: boolean }>;
+    customItems: Array<{ label: string; status: 'pending' | 'started' | 'completed' }>;
     isIssued?: boolean;
 }
 
@@ -142,7 +144,7 @@ const styles = {
         textAlign: 'left' as const,
         fontSize: '0.875rem',
         fontWeight: '700',
-        color: '#475569',
+        color: '#000000',
         textTransform: 'uppercase' as const,
         letterSpacing: '0.05em',
     },
@@ -172,7 +174,7 @@ const styles = {
     emptyState: {
         textAlign: 'center' as const,
         padding: '3rem 1rem',
-        color: '#94a3b8',
+        color: '#000000',
         fontSize: '1rem',
     },
     input: {
@@ -183,13 +185,14 @@ const styles = {
         borderRadius: '8px',
         background: '#ffffff',
         transition: 'all 0.2s ease',
+        color: '#000000',
         fontFamily: 'inherit',
     },
     label: {
         display: 'block',
         fontSize: '0.875rem',
         fontWeight: '600',
-        color: '#334155',
+        color: '#000000',
         marginBottom: '0.5rem',
     },
 };
@@ -203,38 +206,26 @@ const Panel = ({ title, children }: { title: string; children: React.ReactNode }
     </div>
 );
 
-const ChecklistItem = ({ label, completed }: { label: string; completed: boolean }) => (
-    <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.625rem',
-        background: '#ffffff',
-        borderRadius: '6px',
-        border: '1px solid #e2e8f0'
-    }}>
-        <div style={{
-            width: '18px',
-            height: '18px',
-            borderRadius: '4px',
-            background: completed ? '#10b981' : '#e2e8f0',
-            border: completed ? '2px solid #10b981' : '2px solid #cbd5e1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-        }}>
-            {completed && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                    <polyline points="20 6 9 17 4 12" />
-                </svg>
-            )}
+const ChecklistItem = ({ label, completed, status }: { label: string; completed?: boolean; status?: string }) => {
+    const isDone = status === 'completed' || completed;
+    const isStarted = status === 'started';
+
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <div style={{
+                width: '18px', height: '18px', borderRadius: '50%', border: '2px solid',
+                borderColor: isDone ? '#10b981' : isStarted ? '#3b82f6' : '#cbd5e1',
+                background: isDone ? '#10b981' : 'transparent',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0
+            }}>
+                {isDone && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><path d="M20 6L9 17l-5-5" /></svg>}
+            </div>
+            <span style={{ fontSize: '0.8125rem', color: isDone ? '#000000' : '#000000', textDecoration: isDone ? 'line-through' : 'none', fontWeight: isDone ? '400' : '600' }}>{label}</span>
+            {isStarted && !isDone && <span style={{ marginLeft: 'auto', fontSize: '0.625rem', fontWeight: '800', color: '#3b82f6' }}>STARTED</span>}
         </div>
-        <span style={{ fontSize: '0.8125rem', color: completed ? '#0f172a' : '#64748b', fontWeight: completed ? '600' : '400' }}>
-            {label}
-        </span>
-    </div>
-);
+    );
+};
 
 // Documents Tab Component
 export const DocumentsTab = () => {
@@ -314,7 +305,7 @@ export const DocumentsTab = () => {
                         style={{
                             padding: '0.5rem 1rem',
                             background: groupBy === 'client' ? '#2563eb' : '#f1f5f9',
-                            color: groupBy === 'client' ? 'white' : '#64748b',
+                            color: groupBy === 'client' ? 'white' : '#000000',
                             border: 'none',
                             borderRadius: '6px',
                             cursor: 'pointer',
@@ -328,7 +319,7 @@ export const DocumentsTab = () => {
                         style={{
                             padding: '0.5rem 1rem',
                             background: groupBy === 'all' ? '#2563eb' : '#f1f5f9',
-                            color: groupBy === 'all' ? 'white' : '#64748b',
+                            color: groupBy === 'all' ? 'white' : '#000000',
                             border: 'none',
                             borderRadius: '6px',
                             cursor: 'pointer',
@@ -368,7 +359,7 @@ export const DocumentsTab = () => {
                                             {groupBy !== 'client' && (
                                                 <td style={styles.td}>
                                                     <div style={{ fontWeight: '600', color: '#0f172a' }}>{doc.client.name || 'N/A'}</div>
-                                                    <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{doc.client.email}</div>
+                                                    <div style={{ fontSize: '0.875rem', color: '#000000' }}>{doc.client.email}</div>
                                                 </td>
                                             )}
                                             <td style={styles.td}>
@@ -386,7 +377,7 @@ export const DocumentsTab = () => {
                                             </td>
                                             <td style={styles.td}>
                                                 <div style={{ fontWeight: '600', color: '#0f172a' }}>{doc.listing?.title || 'General'}</div>
-                                                {doc.listing?.address && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{doc.listing.address}</div>}
+                                                {doc.listing?.address && <div style={{ fontSize: '0.75rem', color: '#000000' }}>{doc.listing.address}</div>}
                                             </td>
                                             <td style={styles.td}>
                                                 <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
@@ -432,8 +423,37 @@ export const ChecklistsTab = () => {
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [selectedClient, setSelectedClient] = useState('');
-    const [customItems, setCustomItems] = useState<Array<{ label: string; completed: boolean }>>([]);
+    const [isAdHoc, setIsAdHoc] = useState(false);
+    const [adHocName, setAdHocName] = useState('');
+    const [adHocPhone, setAdHocPhone] = useState('');
+    const [customItems, setCustomItems] = useState<Array<{ label: string; status: 'pending' | 'started' | 'completed' }>>([]);
     const [newItemLabel, setNewItemLabel] = useState('');
+    const [expandedChecklist, setExpandedChecklist] = useState<string | null>(null);
+
+    const handleStatusUpdate = async (checklist: Checklist, itemIndex: number, newStatus: string) => {
+        try {
+            const updatedItems = [...checklist.customItems];
+            updatedItems[itemIndex].status = newStatus as any;
+
+            const res = await fetch('/api/checklists', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    clientId: checklist.client._id,
+                    type: checklist.type,
+                    updates: { customItems: updatedItems },
+                }),
+            });
+
+            if (res.ok) {
+                fetchData();
+            } else {
+                alert('Failed to update status');
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+        }
+    };
 
     useEffect(() => {
         fetchData();
@@ -463,7 +483,7 @@ export const ChecklistsTab = () => {
 
     const handleAddItem = () => {
         if (!newItemLabel.trim()) return;
-        setCustomItems([...customItems, { label: newItemLabel, completed: false }]);
+        setCustomItems([...customItems, { label: newItemLabel, status: 'pending' }]);
         setNewItemLabel('');
     };
 
@@ -472,8 +492,13 @@ export const ChecklistsTab = () => {
     };
 
     const handleCreateChecklist = async (issueNow: boolean) => {
-        if (!selectedClient) {
+        if (!isAdHoc && !selectedClient) {
             alert('Please select a client');
+            return;
+        }
+
+        if (isAdHoc && (!adHocName.trim() || !adHocPhone.trim())) {
+            alert('Please enter name and phone for the ad-hoc client');
             return;
         }
 
@@ -482,7 +507,9 @@ export const ChecklistsTab = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    clientId: selectedClient,
+                    clientId: isAdHoc ? undefined : selectedClient,
+                    userName: isAdHoc ? adHocName : undefined,
+                    userPhone: isAdHoc ? adHocPhone : undefined,
                     type: 'general',
                     customItems,
                     issueNow,
@@ -493,6 +520,9 @@ export const ChecklistsTab = () => {
                 alert(`Checklist ${issueNow ? 'created and issued' : 'created as draft'} successfully`);
                 setShowCreateForm(false);
                 setSelectedClient('');
+                setIsAdHoc(false);
+                setAdHocName('');
+                setAdHocPhone('');
                 setCustomItems([]);
                 fetchData();
             } else {
@@ -531,6 +561,27 @@ export const ChecklistsTab = () => {
         }
     };
 
+    const handleDeleteChecklist = async (checklistId: string) => {
+        if (!confirm('Are you sure you want to delete this checklist? This action cannot be undone.')) return;
+
+        try {
+            const res = await fetch(`/api/checklists?checklistId=${checklistId}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                alert('Checklist deleted successfully');
+                fetchData();
+            } else {
+                const error = await res.json();
+                alert(error.error || 'Failed to delete checklist');
+            }
+        } catch (error) {
+            alert('Error deleting checklist');
+            console.error(error);
+        }
+    };
+
     return (
         <Panel title="Client Checklists">
             <div style={{ padding: '1.5rem 2rem' }}>
@@ -539,7 +590,7 @@ export const ChecklistsTab = () => {
                     style={{
                         padding: '0.75rem 1.5rem',
                         background: '#2563eb',
-                        color: 'white',
+                        color: 'black',
                         border: 'none',
                         borderRadius: '8px',
                         cursor: 'pointer',
@@ -552,19 +603,77 @@ export const ChecklistsTab = () => {
 
                 {showCreateForm && (
                     <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem' }}>
-                        <h4 style={{ fontSize: '1.125rem', fontWeight: '700', marginBottom: '1rem' }}>Create New Checklist</h4>
+                        <h4 style={{ fontSize: '1.125rem', fontWeight: '700', marginBottom: '1rem', color: '#000000' }}>Create New Checklist</h4>
 
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={styles.label}>Select Client</label>
-                            <select value={selectedClient} onChange={(e) => setSelectedClient(e.target.value)} style={styles.input}>
-                                <option value="">Choose a client...</option>
-                                {clients.map((client) => (
-                                    <option key={client._id} value={client._id}>
-                                        {client.name || client.email}
-                                    </option>
-                                ))}
-                            </select>
+                        <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem' }}>
+                            <button
+                                onClick={() => setIsAdHoc(false)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.625rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e2e8f0',
+                                    background: !isAdHoc ? '#2563eb' : 'white',
+                                    color: !isAdHoc ? 'white' : '#000000',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Registered Client
+                            </button>
+                            <button
+                                onClick={() => setIsAdHoc(true)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.625rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e2e8f0',
+                                    background: isAdHoc ? '#2563eb' : 'white',
+                                    color: isAdHoc ? 'white' : '#000000',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Ad-hoc Client
+                            </button>
                         </div>
+
+                        {!isAdHoc ? (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={styles.label}>Select Client</label>
+                                <select value={selectedClient} onChange={(e) => setSelectedClient(e.target.value)} style={styles.input}>
+                                    <option value="">Choose a client...</option>
+                                    {clients.map((client) => (
+                                        <option key={client._id} value={client._id}>
+                                            {client.name || client.email}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label style={styles.label}>Full Name</label>
+                                    <input
+                                        type="text"
+                                        value={adHocName}
+                                        onChange={(e) => setAdHocName(e.target.value)}
+                                        placeholder="Enter client name"
+                                        style={styles.input}
+                                    />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label style={styles.label}>Phone Number</label>
+                                    <input
+                                        type="text"
+                                        value={adHocPhone}
+                                        onChange={(e) => setAdHocPhone(e.target.value)}
+                                        placeholder="+977-..."
+                                        style={styles.input}
+                                    />
+                                </div>
+                            </div>
+                        )}
 
 
 
@@ -577,7 +686,7 @@ export const ChecklistsTab = () => {
                                     onChange={(e) => setNewItemLabel(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
                                     placeholder="Enter item label..."
-                                    style={{ ...styles.input, marginBottom: 0 }}
+                                    style={{ ...styles.input, marginBottom: 0, color: '#000000' }}
                                 />
                                 <button
                                     onClick={handleAddItem}
@@ -597,20 +706,48 @@ export const ChecklistsTab = () => {
 
                             {customItems.map((item, index) => (
                                 <div key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                    <span style={{ flex: 1, padding: '0.5rem', background: 'white', borderRadius: '6px' }}>{item.label}</span>
+                                    <span style={{ flex: 1, padding: '0.5rem', background: 'white', borderRadius: '6px', fontSize: '0.875rem', color: '#000000' }}>{item.label}</span>
+                                    <div style={{ display: 'flex', gap: '2px', background: '#f1f5f9', padding: '2px', borderRadius: '6px' }}>
+                                        {['pending', 'started', 'completed'].map((status) => (
+                                            <button
+                                                key={status}
+                                                onClick={() => {
+                                                    const newItems = [...customItems];
+                                                    newItems[index].status = status as any;
+                                                    setCustomItems(newItems);
+                                                }}
+                                                style={{
+                                                    padding: '0.25rem 0.5rem',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
+                                                    borderRadius: '4px',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    background: item.status === status ? (
+                                                        status === 'completed' ? '#10b981' :
+                                                            status === 'started' ? '#3b82f6' : '#cbd5e1'
+                                                    ) : 'transparent',
+                                                    color: item.status === status ? 'white' : '#64748b'
+                                                }}
+                                            >
+                                                {status.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
                                     <button
                                         onClick={() => handleRemoveItem(index)}
                                         style={{
-                                            padding: '0.5rem 1rem',
+                                            padding: '0.5rem',
                                             background: '#fee2e2',
                                             color: '#dc2626',
                                             border: 'none',
                                             borderRadius: '6px',
                                             cursor: 'pointer',
-                                            fontWeight: '600',
                                         }}
                                     >
-                                        Remove
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M18 6L6 18M6 6l12 12" />
+                                        </svg>
                                     </button>
                                 </div>
                             ))}
@@ -668,38 +805,113 @@ export const ChecklistsTab = () => {
                         <tbody>
                             {checklists.map((checklist) => {
                                 const total = checklist.customItems.length;
-                                const completed = checklist.customItems.filter(i => i.completed).length;
-                                const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                                const completed = checklist.customItems.filter(i => i.status === 'completed').length;
+                                const started = checklist.customItems.filter(i => i.status === 'started').length;
+                                const progress = total > 0 ? Math.round(((completed + (started * 0.5)) / total) * 100) : 0;
 
                                 return (
-                                    <tr key={checklist._id}>
-                                        <td style={styles.td}>
-                                            <div style={{ fontWeight: '600', color: '#0f172a' }}>{checklist.client.name || 'N/A'}</div>
-                                            <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{checklist.client.email}</div>
-                                        </td>
-                                        <td style={styles.td}>{checklist.type?.toUpperCase() || 'GENERAL'}</td>
-                                        <td style={styles.td}>{total} items</td>
-                                        <td style={styles.td}>{progress}%</td>
-                                        <td style={styles.td}>
-                                            <span style={{
-                                                padding: '0.375rem 0.75rem',
-                                                borderRadius: '6px',
-                                                fontSize: '0.75rem',
-                                                fontWeight: '600',
-                                                background: checklist.isIssued ? '#dcfce7' : '#fef3c7',
-                                                color: checklist.isIssued ? '#166534' : '#92400e',
-                                            }}>
-                                                {checklist.isIssued ? 'ISSUED' : 'DRAFT'}
-                                            </span>
-                                        </td>
-                                        <td style={{ ...styles.td, textAlign: 'right' }}>
-                                            {!checklist.isIssued && (
-                                                <button onClick={() => handleIssueChecklist(checklist._id)} style={{ ...styles.actionButton, ...styles.buttonSold }}>
-                                                    Issue to Client
+                                    <Fragment key={checklist._id}>
+                                        <tr style={{ cursor: 'pointer' }} onClick={() => setExpandedChecklist(expandedChecklist === checklist._id ? null : checklist._id)}>
+                                            <td style={styles.td}>
+                                                <div style={{ fontWeight: '600', color: '#0f172a' }}>{checklist.client.name || 'N/A'}</div>
+                                                <div style={{ fontSize: '0.875rem', color: '#000000' }}>
+                                                    {checklist.client.isPlaceholder ? `Phone: ${checklist.client.phone || 'N/A'}` : checklist.client.email}
+                                                    {checklist.client.isPlaceholder && <span style={{ marginLeft: '0.5rem', color: '#f59e0b', fontSize: '0.75rem', fontWeight: '700' }}>(AD-HOC)</span>}
+                                                </div>
+                                            </td>
+                                            <td style={{ ...styles.td, color: '#000000' }}>{checklist.type?.toUpperCase() || 'GENERAL'}</td>
+                                            <td style={{ ...styles.td, color: '#000000' }}>{total} items</td>
+                                            <td style={{ ...styles.td, color: '#000000' }}>{progress}%</td>
+                                            <td style={styles.td}>
+                                                <span style={{
+                                                    padding: '0.375rem 0.75rem',
+                                                    borderRadius: '6px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
+                                                    background: checklist.isIssued ? '#dcfce7' : '#fef3c7',
+                                                    color: checklist.isIssued ? '#166534' : '#92400e',
+                                                }}>
+                                                    {checklist.isIssued ? 'ISSUED' : 'DRAFT'}
+                                                </span>
+                                            </td>
+                                            <td style={{ ...styles.td, textAlign: 'right' }}>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setExpandedChecklist(expandedChecklist === checklist._id ? null : checklist._id);
+                                                    }}
+                                                    style={{
+                                                        ...styles.actionButton,
+                                                        background: expandedChecklist === checklist._id ? '#64748b' : '#3b82f6',
+                                                        marginRight: '0.5rem'
+                                                    }}
+                                                >
+                                                    {expandedChecklist === checklist._id ? 'Close' : 'View Items'}
                                                 </button>
-                                            )}
-                                        </td>
-                                    </tr>
+                                                {!checklist.isIssued && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleIssueChecklist(checklist._id);
+                                                        }}
+                                                        style={{ ...styles.actionButton, ...styles.buttonSold }}
+                                                    >
+                                                        Issue
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteChecklist(checklist._id);
+                                                    }}
+                                                    style={{ ...styles.actionButton, ...styles.buttonDelete }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {expandedChecklist === checklist._id && (
+                                            <tr key={`${checklist._id}-expanded`} style={{ background: '#f8fafc' }}>
+                                                <td colSpan={6} style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0' }}>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
+                                                        {checklist.customItems.map((item, idx) => (
+                                                            <div key={idx} style={{ padding: '1rem', background: 'white', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+                                                                <div style={{ fontWeight: '700', color: '#1e293b', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{item.label}</div>
+                                                                <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+                                                                    {['pending', 'started', 'completed'].map((s) => (
+                                                                        <button
+                                                                            key={s}
+                                                                            onClick={() => handleStatusUpdate(checklist, idx, s)}
+                                                                            style={{
+                                                                                flex: 1,
+                                                                                padding: '0.375rem',
+                                                                                fontSize: '0.7rem',
+                                                                                fontWeight: '700',
+                                                                                borderRadius: '6px',
+                                                                                border: 'none',
+                                                                                cursor: 'pointer',
+                                                                                background: item.status === s ? (
+                                                                                    s === 'completed' ? '#10b981' :
+                                                                                        s === 'started' ? '#3b82f6' : '#94a3b8'
+                                                                                ) : 'transparent',
+                                                                                color: item.status === s ? 'white' : '#64748b',
+                                                                                transition: 'all 0.2s'
+                                                                            }}
+                                                                        >
+                                                                            {s.toUpperCase()}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    {checklist.customItems.length === 0 && (
+                                                        <div style={{ textAlign: 'center', color: '#64748b', padding: '1rem' }}>No items in this checklist</div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </Fragment>
                                 );
                             })}
                         </tbody>
@@ -1178,7 +1390,7 @@ export const ConversationsTab = () => {
                                     <ChecklistItem label="Offer Made" completed={checklist.offerMade} />
                                     <ChecklistItem label="Offer Accepted" completed={checklist.offerAccepted} />
                                     {checklist.customItems?.map((item, idx) => (
-                                        <ChecklistItem key={idx} label={item.label} completed={item.completed} />
+                                        <ChecklistItem key={idx} label={item.label} status={item.status} />
                                     ))}
                                 </div>
                             ) : (
@@ -1249,8 +1461,8 @@ export const ClientsTab = () => {
                                         <div style={{ fontWeight: '600', color: '#0f172a' }}>{client.name || 'Anonymous'}</div>
                                     </div>
                                 </td>
-                                <td style={styles.td}>{client.email}</td>
-                                <td style={styles.td}>
+                                <td style={{ ...styles.td, color: '#000000' }}>{client.email}</td>
+                                <td style={{ ...styles.td, color: '#000000' }}>
                                     {client.createdAt ? new Date(client.createdAt).toLocaleDateString() : 'N/A'}
                                 </td>
                                 <td style={styles.td}>
@@ -1316,15 +1528,15 @@ export const TourBookingsTab = () => {
                             <tr key={booking._id}>
                                 <td style={styles.td}>
                                     <div style={{ fontWeight: '600', color: '#0f172a' }}>{booking.client.name}</div>
-                                    <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{booking.client.email}</div>
+                                    <div style={{ fontSize: '0.875rem', color: '#000000' }}>{booking.client.email}</div>
                                 </td>
                                 <td style={styles.td}>
                                     <div style={{ fontWeight: '600', color: '#0f172a' }}>{booking.listing.title}</div>
-                                    <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{booking.listing.address}</div>
+                                    <div style={{ fontSize: '0.875rem', color: '#000000' }}>{booking.listing.address}</div>
                                 </td>
                                 <td style={styles.td}>
                                     <div>{new Date(booking.preferredDate).toLocaleDateString()}</div>
-                                    <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{booking.preferredTime}</div>
+                                    <div style={{ fontSize: '0.875rem', color: '#000000' }}>{booking.preferredTime}</div>
                                 </td>
                                 <td style={styles.td}>
                                     <span style={{ padding: '0.375rem 0.75rem', borderRadius: '12px', fontSize: '0.8125rem', fontWeight: '600', background: booking.status === 'confirmed' ? '#dcfce7' : '#fef3c7', color: booking.status === 'confirmed' ? '#166534' : '#92400e' }}>
@@ -1340,3 +1552,5 @@ export const TourBookingsTab = () => {
         </Panel>
     );
 };
+
+
