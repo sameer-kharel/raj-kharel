@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState, FormEvent, ChangeEvent, ReactNode } from 'react';
+import { useEffect, useState, FormEvent, ChangeEvent, ReactNode, useRef } from 'react';
 import Image from 'next/image';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import { DocumentsTab, ClientsTab, TourBookingsTab, ConversationsTab, ChecklistsTab } from './AdminTabs';
 
 interface Listing {
   _id: string;
@@ -62,6 +64,103 @@ interface Stats {
   soldProperties: number;
   totalValue: number;
 }
+
+// New interfaces for client management
+interface User {
+  _id: string;
+  googleId?: string;
+  email: string;
+  name?: string;
+  image?: string;
+  role: 'client' | 'admin';
+  lastLogin?: string;
+  createdAt: string;
+}
+
+interface Conversation {
+  _id: string;
+  client: User;
+  listing: {
+    _id: string;
+    title: string;
+    address: string;
+    featuredImage: string;
+  };
+  clientUnreadCount: number;
+  adminUnreadCount: number;
+  lastMessageAt: string;
+}
+
+interface Message {
+  _id: string;
+  sender: {
+    _id: string;
+    name: string;
+    role: string;
+  };
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+interface TourBooking {
+  _id: string;
+  client: User;
+  listing: {
+    _id: string;
+    title: string;
+    address: string;
+    featuredImage: string;
+  };
+  preferredDate: string;
+  preferredTime: string;
+  alternateDate?: string;
+  alternateTime?: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  confirmedDate?: string;
+  confirmedTime?: string;
+  clientNotes?: string;
+  adminNotes?: string;
+  createdAt: string;
+}
+
+interface DocumentSubmission {
+  _id: string;
+  client: User;
+  listing?: {
+    _id: string;
+    title: string;
+    address: string;
+  };
+
+  documentType: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  status: 'pending' | 'verified' | 'rejected';
+  rejectionReason?: string;
+  createdAt: string;
+}
+
+interface Checklist {
+  _id: string;
+  client: User;
+  listing?: {
+    _id: string;
+    title: string;
+    address: string;
+  };
+  type?: 'buying' | 'selling' | 'general';
+  tourCompleted: boolean;
+  documentsSubmitted: boolean;
+  documentsVerified: boolean;
+  advancePaymentMade?: boolean;
+  offerMade: boolean;
+  offerAccepted: boolean;
+  customItems: Array<{ label: string; completed: boolean }>;
+  notes?: string;
+}
+
 
 const initialFormData = {
   title: '',
@@ -417,6 +516,11 @@ const Icons = {
   sold: <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
   add: <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>,
   dollar: <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>,
+  users: <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+  chat: <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>,
+  calendar: <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+  document: <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+  checklist: <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>,
 };
 
 const LoginButton = ({ children, ...props }: { children: ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
@@ -464,7 +568,7 @@ const LoginInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => {
 };
 
 export default function AdminDashboardPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { data: session, status } = useSession();
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -473,13 +577,7 @@ export default function AdminDashboardPage() {
   const [soldProperties, setSoldProperties] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is already authenticated on mount
-  useEffect(() => {
-    const authStatus = sessionStorage.getItem('adminAuthenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
+  const isAuthenticated = session?.user?.role === 'admin';
 
   const fetchData = async () => {
     setLoading(true);
@@ -534,6 +632,16 @@ export default function AdminDashboardPage() {
     }
   }, [isAuthenticated]);
 
+  if (status === 'loading') {
+    return (
+      <div style={styles.loginContainer}>
+        <div style={styles.loginCard}>
+          <div style={styles.emptyState}>Verifying access...</div>
+        </div>
+      </div>
+    );
+  }
+
   const handleRefresh = () => fetchData();
 
   const handleLogin = async (e: FormEvent) => {
@@ -541,22 +649,15 @@ export default function AdminDashboardPage() {
     setLoginError('');
 
     try {
-      const response = await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
+      const result = await signIn('credentials', {
+        password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        setIsAuthenticated(true);
-        sessionStorage.setItem('adminAuthenticated', 'true');
+      if (result?.error) {
+        setLoginError('Incorrect password. Please try again.');
         setPassword('');
       } else {
-        setLoginError('Incorrect password. Please try again.');
         setPassword('');
       }
     } catch (error) {
@@ -567,8 +668,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem('adminAuthenticated');
+    signOut({ redirect: false });
     setActiveTab('dashboard');
   };
 
@@ -630,6 +730,11 @@ export default function AdminDashboardPage() {
           <TabButton name="Sold Properties" tabId="sold" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.sold} />
           <TabButton name="Blog & Newsletter" tabId="blog" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.add} />
           <TabButton name="Add New Listing" tabId="add" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.add} />
+          <TabButton name="Clients" tabId="clients" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.users} />
+          <TabButton name="Conversations" tabId="conversations" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.chat} />
+          <TabButton name="Tour Bookings" tabId="tours" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.calendar} />
+          <TabButton name="Documents" tabId="documents" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.document} />
+          <TabButton name="Checklists" tabId="checklists" activeTab={activeTab} setActiveTab={setActiveTab} icon={Icons.checklist} />
         </div>
 
         <main>
@@ -642,6 +747,11 @@ export default function AdminDashboardPage() {
               {activeTab === 'sold' && <SoldPropertiesTab soldProperties={soldProperties} onRefresh={handleRefresh} />}
               {activeTab === 'blog' && <BlogNewsletterTab />}
               {activeTab === 'add' && <AddListingTab onListingAdded={() => { handleRefresh(); setActiveTab('manage'); }} />}
+              {activeTab === 'clients' && <ClientsTab />}
+              {activeTab === 'conversations' && <ConversationsTab />}
+              {activeTab === 'tours' && <TourBookingsTab />}
+              {activeTab === 'documents' && <DocumentsTab />}
+              {activeTab === 'checklists' && <ChecklistsTab />}
             </>
           )}
         </main>

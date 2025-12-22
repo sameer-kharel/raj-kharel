@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Listing {
   _id: string;
@@ -19,12 +21,15 @@ interface Listing {
 }
 
 export default function ListingsPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState('San Jose, CA');
   const [propertyType, setPropertyType] = useState('Apartments');
   const [priceRange, setPriceRange] = useState('$2,000–$13,000');
   const [bedrooms, setBedrooms] = useState('3–5');
+  const [startingChat, setStartingChat] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -42,6 +47,53 @@ export default function ListingsPage() {
     };
     fetchListings();
   }, []);
+
+  const handleContactAgent = async (listingId: string) => {
+    if (!session) {
+      router.push('/login?callbackUrl=/listings');
+      return;
+    }
+
+    setStartingChat(listingId);
+    try {
+      // Create conversation
+      const res = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const conversationId = data.conversation._id;
+
+        // Find the listing to get details
+        const listing = listings.find(l => l._id === listingId);
+
+        // Send initial message about the listing
+        if (listing) {
+          await fetch(`/api/conversations/${conversationId}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `Hi, I'm interested in learning more about ${listing.title} at ${listing.address}. Could you provide more details?`
+            }),
+          });
+        }
+
+        // Redirect to chat
+        router.push(`/chat?conversation=${conversationId}`);
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to start conversation: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      alert('Failed to start conversation. Please try again.');
+    } finally {
+      setStartingChat(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -659,12 +711,40 @@ export default function ListingsPage() {
 
               </div>
 
-              <Link href="/contact" className="contact-property-btn">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
-                </svg>
-                Schedule a Tour
-              </Link>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => handleContactAgent(listings[0]._id)}
+                  disabled={startingChat === listings[0]._id}
+                  style={{
+                    flex: 1,
+                    padding: '16px',
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                    color: 'white',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    borderRadius: '16px',
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    cursor: startingChat === listings[0]._id ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.3s',
+                    opacity: startingChat === listings[0]._id ? 0.6 : 1,
+                  }}
+                >
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  {startingChat === listings[0]._id ? 'Starting...' : 'Contact Agent'}
+                </button>
+                <Link href="/contact" className="contact-property-btn" style={{ flex: 1 }}>
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
+                  Schedule a Tour
+                </Link>
+              </div>
             </motion.div>
           </div>
         )}
@@ -764,6 +844,34 @@ export default function ListingsPage() {
                     <span className="feature-item">{listing.bathrooms} baths</span>
                     <span className="feature-item">{listing.sqft.toLocaleString()} sqft</span>
                   </div>
+
+                  <button
+                    onClick={() => handleContactAgent(listing._id)}
+                    disabled={startingChat === listing._id}
+                    style={{
+                      width: '100%',
+                      marginTop: '16px',
+                      padding: '12px',
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: startingChat === listing._id ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s',
+                      opacity: startingChat === listing._id ? 0.6 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    {startingChat === listing._id ? 'Starting...' : 'Contact Agent'}
+                  </button>
                 </div>
               </motion.div>
             ))}

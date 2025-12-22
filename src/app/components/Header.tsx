@@ -3,11 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import Image from 'next/image';
 
 const Header = () => {
+  const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [isMobileToolsOpen, setIsMobileToolsOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -276,6 +280,224 @@ const Header = () => {
           </Link>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Auth Button */}
+            {status === 'loading' ? (
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: '#f3f4f6',
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+              }} />
+            ) : session ? (
+              <div
+                style={{ position: 'relative' }}
+                onMouseEnter={() => setIsUserMenuOpen(true)}
+                onMouseLeave={() => setIsUserMenuOpen(false)}
+              >
+                <button
+                  style={{
+                    background: 'white',
+                    borderRadius: '9999px',
+                    padding: '0.5rem',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  {session.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || 'User'}
+                      width={32}
+                      height={32}
+                      style={{ borderRadius: '50%' }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: '#2563eb',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: '600',
+                      fontSize: '0.875rem'
+                    }}>
+                      {session.user?.name?.charAt(0) || 'U'}
+                    </div>
+                  )}
+                </button>
+
+                {/* User Dropdown */}
+                <AnimatePresence>
+                  {isUserMenuOpen && (
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        right: 0,
+                        marginTop: '0.5rem',
+                        background: 'white',
+                        borderRadius: '1rem',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                        padding: '0.75rem',
+                        minWidth: '200px',
+                        zIndex: 1000,
+                        border: '1px solid rgba(0, 0, 0, 0.05)'
+                      }}
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div style={{
+                        padding: '0.75rem',
+                        borderBottom: '1px solid #f3f4f6',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <p style={{
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          color: '#1f2937',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {session.user?.name}
+                        </p>
+                        <p style={{
+                          fontSize: '0.75rem',
+                          color: '#6b7280'
+                        }}>
+                          {session.user?.email}
+                        </p>
+                      </div>
+
+                      <Link
+                        href="/dashboard"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.75rem',
+                          borderRadius: '0.5rem',
+                          textDecoration: 'none',
+                          color: '#1f2937',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <span>📊</span>
+                        Dashboard
+                      </Link>
+
+                      <Link
+                        href="/chat"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.75rem',
+                          borderRadius: '0.5rem',
+                          textDecoration: 'none',
+                          color: '#1f2937',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <span>💬</span>
+                        Messages
+                      </Link>
+
+                      <Link
+                        href="/tours"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.75rem',
+                          borderRadius: '0.5rem',
+                          textDecoration: 'none',
+                          color: '#1f2937',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <span>🏠</span>
+                        Tours
+                      </Link>
+
+                      <button
+                        onClick={() => signOut({ callbackUrl: '/' })}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.75rem',
+                          borderRadius: '0.5rem',
+                          border: 'none',
+                          background: 'transparent',
+                          color: '#dc2626',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s',
+                          marginTop: '0.5rem',
+                          borderTop: '1px solid #f3f4f6',
+                          paddingTop: '1rem'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#fee2e2'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <span>🚪</span>
+                        Sign Out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <motion.button
+                onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+                style={{
+                  background: 'white',
+                  borderRadius: '9999px',
+                  padding: '0.75rem 1.5rem',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)'
+                }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Sign In
+              </motion.button>
+            )}
+
             {/* Hamburger Button */}
             {(!isMenuOpen) && <button
               style={{
