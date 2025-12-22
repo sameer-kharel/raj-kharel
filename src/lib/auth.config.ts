@@ -4,6 +4,21 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import User from '@/models/User';
 import dbConnect from './mongodb';
 
+// Health check for environment variables in production
+if (process.env.NODE_ENV === 'production') {
+    const requiredVars = [
+        'GOOGLE_CLIENT_ID',
+        'GOOGLE_CLIENT_SECRET',
+        'NEXTAUTH_SECRET',
+        'MONGODB_URI'
+    ];
+    requiredVars.forEach(v => {
+        if (!process.env[v]) {
+            console.error(`ENVIRONMENT VARIABLE MISSING: ${v} is not defined in production!`);
+        }
+    });
+}
+
 export const authOptions: NextAuthOptions = {
     providers: [
         GoogleProvider({
@@ -93,10 +108,15 @@ export const authOptions: NextAuthOptions = {
             }
         },
         async jwt({ token, user, account }) {
-            if (user) {
-                token.email = user.email;
+            try {
+                if (user) {
+                    token.email = user.email;
+                }
+                return token;
+            } catch (error) {
+                console.error('Error in jwt callback:', error);
+                return token;
             }
-            return token;
         },
     },
     pages: {
@@ -107,4 +127,52 @@ export const authOptions: NextAuthOptions = {
         strategy: 'jwt',
     },
     secret: process.env.NEXTAUTH_SECRET,
+    useSecureCookies: process.env.NODE_ENV === 'production',
+    cookies: process.env.NODE_ENV === 'production' ? {
+        sessionToken: {
+            name: `__Secure-next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: true,
+            },
+        },
+        callbackUrl: {
+            name: `__Secure-next-auth.callback-url`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: true,
+            },
+        },
+        csrfToken: {
+            name: `__Host-next-auth.csrf-token`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: true,
+            },
+        },
+        pkceCodeVerifier: {
+            name: `__Secure-next-auth.pkce.code_verifier`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: true,
+            },
+        },
+        state: {
+            name: `__Secure-next-auth.state`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: true,
+            },
+        },
+    } : undefined,
 };
